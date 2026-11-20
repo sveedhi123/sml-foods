@@ -1,6 +1,7 @@
 /**
  * SML Foods - Luxury Artisanal Storefront
  * Complete storefront with product seeding, weight selectors, cart drawer, WhatsApp checkout
+ * Exposes global API for 3D store integration
  */
 
 // Firebase initialization
@@ -41,6 +42,7 @@ const DEFAULT_PRODUCTS = [
     description: 'Hand-churned from curd of free-grazing Gir cows using the ancient bilona method. 30L of A2 milk yields just 1kg of this liquid gold. Rich in Omega-3, butyric acid, and fat-soluble vitamins.',
     shortDesc: 'Traditional bilona-churned from Gir cow curd',
     image: 'https://images.unsplash.com/photo-1625944970930-2d7825127b96?w=600&q=80',
+    imageHover: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=80',
     variants: [
       { weight: '250ml', price: 850, sku: 'GHEE-BIL-250', inStock: true },
       { weight: '500ml', price: 1650, sku: 'GHEE-BIL-500', inStock: true },
@@ -49,7 +51,8 @@ const DEFAULT_PRODUCTS = [
     badges: ['Bestseller', '100% Pure'],
     tags: ['A2', 'Bilona', 'Gir Cow', 'No Preservatives'],
     churnDate: '2026-11-15',
-    status: 'in_stock'
+    status: 'in_stock',
+    shelfPosition: 'ghee'
   },
   {
     id: 'ghee-bilona-cultured',
@@ -58,6 +61,7 @@ const DEFAULT_PRODUCTS = [
     description: 'Premium small-batch ghee cultured for 24 hours before churning. Stored in premium borosilicate glass jars with nitrogen flush. Deeper nutty aroma, higher smoke point.',
     shortDesc: '24hr cultured, glass jar, nitrogen flushed',
     image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=80',
+    imageHover: 'https://images.unsplash.com/photo-1625944970930-2d7825127b96?w=600&q=80',
     variants: [
       { weight: '250ml', price: 1100, sku: 'GHEE-CUL-250', inStock: true },
       { weight: '500ml', price: 2100, sku: 'GHEE-CUL-500', inStock: true }
@@ -65,7 +69,8 @@ const DEFAULT_PRODUCTS = [
     badges: ['Premium', 'Glass Jar'],
     tags: ['A2', 'Cultured', 'Glass Jar', 'Nitrogen Flushed'],
     churnDate: '2026-11-10',
-    status: 'in_stock'
+    status: 'in_stock',
+    shelfPosition: 'ghee'
   },
 
   // ANDHRA PICKLES
@@ -76,6 +81,7 @@ const DEFAULT_PRODUCTS = [
     description: 'Andhra\'s crown jewel — raw Rajapuri mangoes hand-cut, layered with kachi ghani mustard oil, rock salt, red chili, mustard, methi, and turmeric. Sun-cured 21 days on cotton cloth. No vinegar, no water.',
     shortDesc: 'Raw Rajapuri mango, 21-day sun cure, kachi ghani oil',
     image: 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=600&q=80',
+    imageHover: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=600&q=80',
     variants: [
       { weight: '200g', price: 320, sku: 'PKL-AVA-200', inStock: true },
       { weight: '500g', price: 750, sku: 'PKL-AVA-500', inStock: true },
@@ -84,7 +90,8 @@ const DEFAULT_PRODUCTS = [
     badges: ['Bestseller', 'Traditional'],
     tags: ['Andhra', 'Mango', 'Sun-Cured', 'No Vinegar', 'Mustard Oil'],
     cureDate: '2026-10-25',
-    status: 'in_stock'
+    status: 'in_stock',
+    shelfPosition: 'pickles'
   },
   {
     id: 'pickle-gongura',
@@ -93,6 +100,7 @@ const DEFAULT_PRODUCTS = [
     description: 'Tangy gongura leaves (sorrel) hand-picked at dawn, stone-ground with garlic, red chili, and cold-pressed sesame oil. The quintessential Andhra accompaniment — sour, spicy, deeply aromatic.',
     shortDesc: 'Dawn-picked sorrel leaves, stone-ground, sesame oil',
     image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=600&q=80',
+    imageHover: 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=600&q=80',
     variants: [
       { weight: '200g', price: 280, sku: 'PKL-GON-200', inStock: true },
       { weight: '500g', price: 650, sku: 'PKL-GON-500', inStock: true }
@@ -100,7 +108,8 @@ const DEFAULT_PRODUCTS = [
     badges: ['Regional Specialty'],
     tags: ['Andhra', 'Gongura', 'Sorrel', 'Stone-Ground', 'Sesame Oil'],
     cureDate: '2026-11-01',
-    status: 'in_stock'
+    status: 'in_stock',
+    shelfPosition: 'pickles'
   },
   {
     id: 'pickle-tomato',
@@ -109,6 +118,7 @@ const DEFAULT_PRODUCTS = [
     description: 'Roma tomatoes sun-dried for 5 days, then slow-cooked with tamarind, jaggery, and a secret spice blend. Sweet, tangy, spicy — a modern classic that pairs with everything from curd rice to toast.',
     shortDesc: '5-day sun-dried tomatoes, tamarind-jaggery base',
     image: 'https://images.unsplash.com/photo-1584269621910-57c0b4b5b5e9?w=600&q=80',
+    imageHover: 'https://images.unsplash.com/photo-1611890652135-51c393b8b5e0?w=600&q=80',
     variants: [
       { weight: '200g', price: 250, sku: 'PKL-TOM-200', inStock: true },
       { weight: '500g', price: 580, sku: 'PKL-TOM-500', inStock: true }
@@ -116,7 +126,8 @@ const DEFAULT_PRODUCTS = [
     badges: ['New', 'Vegetarian'],
     tags: ['Tomato', 'Sun-Dried', 'Sweet-Spicy', 'Tamarind'],
     cureDate: '2026-11-05',
-    status: 'in_stock'
+    status: 'in_stock',
+    shelfPosition: 'pickles'
   },
   {
     id: 'pickle-mixed',
@@ -125,6 +136,7 @@ const DEFAULT_PRODUCTS = [
     description: 'Carrots, cauliflower, green mango, lime, and green chili — each vegetable cured separately then combined. A symphony of textures in mustard oil with panch phoron. The complete Andhra thali experience in one jar.',
     shortDesc: '5 vegetables, panch phoron, mustard oil',
     image: 'https://images.unsplash.com/photo-1611890652135-51c393b8b5e0?w=600&q=80',
+    imageHover: 'https://images.unsplash.com/photo-1584269621910-57c0b4b5b5e9?w=600&q=80',
     variants: [
       { weight: '300g', price: 350, sku: 'PKL-MIX-300', inStock: true },
       { weight: '600g', price: 680, sku: 'PKL-MIX-600', inStock: true }
@@ -132,7 +144,8 @@ const DEFAULT_PRODUCTS = [
     badges: ['Variety Pack'],
     tags: ['Mixed Veg', 'Panch Phoron', 'Mustard Oil', 'Lime'],
     cureDate: '2026-11-08',
-    status: 'in_stock'
+    status: 'in_stock',
+    shelfPosition: 'pickles'
   },
 
   // MALAI PANEER
@@ -143,6 +156,7 @@ const DEFAULT_PRODUCTS = [
     description: 'Made fresh each morning from full-cream A2 Gir cow milk. No citric acid — coagulated with traditional whey starter. Soft, creamy, holds shape in gravy. Delivered chilled within hours of setting.',
     shortDesc: 'Whey-coagulated, A2 milk, delivered fresh daily',
     image: 'https://images.unsplash.com/photo-1633791023101-6d824a9c7e2d?w=600&q=80',
+    imageHover: 'https://images.unsplash.com/photo-1603133872878-684f208aaaf4?w=600&q=80',
     variants: [
       { weight: '200g', price: 180, sku: 'PNR-MAL-200', inStock: true },
       { weight: '500g', price: 420, sku: 'PNR-MAL-500', inStock: true }
@@ -150,7 +164,8 @@ const DEFAULT_PRODUCTS = [
     badges: ['Fresh Daily', 'A2 Milk'],
     tags: ['Paneer', 'Malai', 'A2', 'Whey-Set', 'No Acid'],
     madeDate: '2026-11-20',
-    status: 'in_stock'
+    status: 'in_stock',
+    shelfPosition: 'paneer'
   },
   {
     id: 'paneer-malai-spiced',
@@ -159,6 +174,7 @@ const DEFAULT_PRODUCTS = [
     description: 'Our classic malai paneer infused with fresh coriander, green chili, and black pepper. Ready to grill, toss in salad, or eat as-is. No additional seasoning needed.',
     shortDesc: 'Coriander, green chili, black pepper infused',
     image: 'https://images.unsplash.com/photo-1603133872878-684f208aaaf4?w=600&q=80',
+    imageHover: 'https://images.unsplash.com/photo-1633791023101-6d824a9c7e2d?w=600&q=80',
     variants: [
       { weight: '200g', price: 210, sku: 'PNR-HRB-200', inStock: true },
       { weight: '500g', price: 490, sku: 'PNR-HRB-500', inStock: true }
@@ -166,13 +182,35 @@ const DEFAULT_PRODUCTS = [
     badges: ['Ready to Eat', 'Flavored'],
     tags: ['Paneer', 'Herbed', 'Coriander', 'Chili', 'Grilled'],
     madeDate: '2026-11-20',
-    status: 'in_stock'
+    status: 'in_stock',
+    shelfPosition: 'paneer'
   }
 ];
 
 // Delivery fee structure
 const DELIVERY_FREE_THRESHOLD = 1500;
 const DELIVERY_FEE = 60;
+
+// ==========================================================================
+// GLOBAL API FOR 3D STORE INTEGRATION
+// ==========================================================================
+
+// Expose products array globally for store3d.js
+Object.defineProperty(window, 'smlProducts', {
+  get: () => products,
+  configurable: true
+});
+
+// Expose addToCart function globally for store3d.js
+window.smlAddToCart = function(productId, variantIndex) {
+  // This will be overridden by the actual addToCart function after initialization
+  console.log('smlAddToCart called before initialization:', productId, variantIndex);
+};
+
+// Expose other useful functions
+window.smlGetProducts = () => products;
+window.smlGetCart = () => cart;
+window.smlRefreshProducts = () => loadProducts().then(() => renderProducts());
 
 // ==========================================================================
 // INITIALIZATION
@@ -191,12 +229,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Load products: try Firestore first, fallback to defaults
   await loadProducts();
   
+  // Now expose the real addToCart function globally
+  window.smlAddToCart = addToCart;
+  
   // Initial render
   renderProducts();
   updateCartUI();
   
   // Trigger hero animations
   animateHeroElements();
+  
+  console.log('🪔 SML Foods Storefront Initialized - Global API ready for 3D store');
 });
 
 // ==========================================================================
@@ -228,6 +271,9 @@ async function loadProducts() {
     products = DEFAULT_PRODUCTS.map((p, i) => ({ ...p, id: p.id || `default-${i}` }));
     isFirestoreLoaded = false;
   }
+  
+  // Update global reference
+  window.smlProducts = products;
 }
 
 async function seedDefaultProducts() {
@@ -253,6 +299,8 @@ async function seedDefaultProducts() {
     products = [...DEFAULT_PRODUCTS];
     isFirestoreLoaded = false;
   }
+  
+  window.smlProducts = products;
 }
 
 // ==========================================================================
@@ -287,11 +335,13 @@ function renderProducts() {
 }
 
 function generateProductCard(product, index) {
-  const defaultVariant = product.variants.find(v => v.inStock) || product.variants[0];
-  const hasMultipleVariants = product.variants.length > 1;
+  const defaultVariant = product.variants?.find(v => v.inStock) || product.variants?.[0];
+  const hasMultipleVariants = (product.variants?.length || 0) > 1;
   const badgesHtml = product.badges?.map(badge => 
     `<span class="product-card-badge ${badge.toLowerCase().includes('best') ? 'badge-bestseller' : badge.toLowerCase().includes('pure') ? 'badge-pure' : badge.toLowerCase().includes('new') ? 'badge-new' : badge.toLowerCase().includes('premium') ? 'badge-bestseller' : ''}">${escapeHtml(badge)}</span>`
   ).join('') || '';
+  
+  const imageHover = product.imageHover ? `data-hover="${escapeHtml(product.imageHover)}"` : '';
   
   return `
     <article class="product-card reveal delay-${Math.min(index + 1, 6)}" data-product-id="${escapeHtml(product.id)}" role="listitem">
@@ -301,6 +351,7 @@ function generateProductCard(product, index) {
           alt="${escapeHtml(product.name)}" 
           loading="lazy"
           width="400" height="400"
+          ${imageHover}
         >
         ${badgesHtml ? `<div class="absolute top-3 left-3 flex flex-col gap-1.5">${badgesHtml}</div>` : ''}
         ${!defaultVariant?.inStock ? '<div class="absolute inset-0 bg-black/60 flex items-center justify-center"><span class="text-white font-medium px-4 py-2 rounded-lg bg-red-500/90">Out of Stock</span></div>' : ''}
@@ -334,7 +385,7 @@ function generateProductCard(product, index) {
         
         <div class="product-card-footer">
           <div class="product-card-price-row">
-            <span class="product-card-price" data-price-display>₹${defaultVariant?.price.toLocaleString('en-IN')}</span>
+            <span class="product-card-price" data-price-display>₹${defaultVariant?.price?.toLocaleString('en-IN') || 0}</span>
             <span class="product-card-status ${defaultVariant?.inStock ? 'status-in-stock' : 'status-out-stock'}">
               ${defaultVariant?.inStock ? 'In Stock' : 'Out of Stock'}
             </span>
@@ -439,7 +490,7 @@ function addToCart(productId, variantIndex) {
   const product = products.find(p => p.id === productId);
   if (!product) return;
   
-  const variant = product.variants[variantIndex];
+  const variant = product.variants?.[variantIndex];
   if (!variant || !variant.inStock) return;
   
   const btn = document.querySelector(`.btn-add-cart[data-product-id="${productId}"][data-variant-index="${variantIndex}"]`);
