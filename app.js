@@ -64,7 +64,7 @@ function renderProducts() {
     }
     
     filteredProducts.forEach(product => {
-        productGrid.innerHTML += generateProductCard(product);
+        productsGrid.innerHTML += generateProductCard(product);
     });
 }
 
@@ -72,7 +72,7 @@ function renderProducts() {
 function generateProductCard(p) {
     const statusClass = p.status === 'in_stock' ? 'bg-green-500/15 text-green-600' : 'bg-red-500/15 text-red-600';
     const statusLabel = p.status === 'in_stock' ? 'In Stock' : 'Out of Stock';
-    const prices = [{ label: '250g', value: p.price250g }, { label: '500g', value: p.price500g }, { label: '1kg', value: p.price1kg }].filter(p => p.value > 0);
+    const prices = [{ label: '250g', value: p.price250g }, { label: '500g', value: p.price500g }, { label: '1kg', value: p.price1kg }].filter(pr => pr.value > 0);
 
     return `
         <div class="bg-brand-card rounded-2xl border border-stone-800 overflow-hidden hover:border-amber-500/40 flex flex-col">
@@ -184,7 +184,7 @@ window.placeOrder = async function() {
 
 function escapeHtml(str) {
     if (!str) return '';
-    return str.replace(/[&<>"']/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39; }[tag]));
+    return str.replace(/[&<>"']/g, tag => ({ '&': '&', '<': '<', '>': '>', '"': '"', "'": '' }[tag]));
 }
 
 // Setup
@@ -200,4 +200,4 @@ document.getElementById('checkout-btn')?.addEventListener('click', window.placeO
 const observer = new IntersectionObserver((entries) => {
     if (entries[0].isIntersecting) taglineText.classList.add('is-revealed');
 }, { threshold: 0.3 });
-observer.observe(taglineSection);</arg_value>
+observer.observe(taglineSection);
