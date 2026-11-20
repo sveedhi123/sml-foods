@@ -1,207 +1,203 @@
 /**
- * Seetha Maha Lakshmi (SML) Foods - Shopping Cart & Interactive Logic
+ * SML Foods - Storefront with Firestore Integration
  */
 
-// State Management
-let cart = [];
-
-// DOM Elements
-const cartBtn = document.getElementById('cart-btn');
-const cartCount = document.getElementById('cart-count');
-const cartDrawer = document.getElementById('cart-drawer');
-const cartBackdrop = document.getElementById('cart-backdrop');
-const closeCartBtn = document.getElementById('close-cart');
-const cartItemsContainer = document.getElementById('cart-items');
-const cartTotalEl = document.getElementById('cart-total');
-const checkoutBtn = document.getElementById('checkout-btn');
-const taglineText = document.getElementById('tagline-text');
+const db = firebase.firestore();
+const productsGrid = document.getElementById('products-grid');
+const categoryTabs = document.querySelectorAll('.category-tab');
 const taglineSection = document.getElementById('tagline-section');
+const taglineText = document.getElementById('tagline-text');
 
-// Initialize App
+let products = [];
+let currentCategory = 'all';
+
+// Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    setupCartListeners();
+    setupCategoryTabs();
+    initLiveOrders();
     setupTaglineReveal();
-    renderCart();
 });
 
-// Cart Drawer Open / Close Functions
-function openCart() {
-    if (!cartDrawer) return;
-    cartDrawer.classList.add('open');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeCart() {
-    if (!cartDrawer) return;
-    cartDrawer.classList.remove('open');
-    document.body.style.overflow = '';
-}
-
-function setupCartListeners() {
-    if (cartBtn) cartBtn.addEventListener('click', openCart);
-    if (closeCartBtn) closeCartBtn.addEventListener('click', closeCart);
-    if (cartBackdrop) cartBackdrop.addEventListener('click', closeCart);
-    if (checkoutBtn) checkoutBtn.addEventListener('click', handleCheckout);
-    
-    // Escape key to close cart
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeCart();
+// Category Tab Handling
+function setupCategoryTabs() {
+    categoryTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            categoryTabs.forEach(t => t.classList.remove('active', 'bg-amber-500', 'text-black'));
+            categoryTabs.forEach(t => t.classList.add('bg-stone-900', 'border', 'border-stone-800', 'text-stone-300', 'hover:text-white', 'hover:bg-stone-800'));
+            this.classList.add('active', 'bg-amber-500', 'text-black');
+            currentCategory = this.dataset.category;
+            renderProducts();
+        });
     });
 }
 
-// Global Add to Cart Function
-window.addToCart = function(name, price, size = 'Standard') {
-    const existingIndex = cart.findIndex(item => item.name === name && item.size === size);
-    
-    if (existingIndex > -1) {
-        cart[existingIndex].qty += 1;
-    } else {
-        cart.push({
-            id: Date.now(),
-            name: name,
-            price: price,
-            size: size,
-            qty: 1
-        });
-    }
-
-    renderCart();
-    openCart();
-    animateBadge();
-};
-
-// Update Item Quantity
-window.updateQty = function(id, delta) {
-    const itemIndex = cart.findIndex(item => item.id === id);
-    if (itemIndex === -1) return;
-
-    cart[itemIndex].qty += delta;
-
-    if (cart[itemIndex].qty <= 0) {
-        cart.splice(itemIndex, 1);
-    }
-
-    renderCart();
-};
-
-// Remove Item Entirely
-window.removeItem = function(id) {
-    cart = cart.filter(item => item.id !== id);
-    renderCart();
-};
-
-// Render Cart HTML & Totals
-function renderCart() {
-    if (!cartItemsContainer || !cartTotalEl || !cartCount) return;
-
-    const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
-    const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-
-    // Update Badge Count & Total
-    cartCount.textContent = totalQty;
-    cartTotalEl.textContent = `₹${totalPrice.toLocaleString('en-IN')}`;
-    
-    if (checkoutBtn) {
-        checkoutBtn.disabled = cart.length === 0;
-    }
-
-    // Render Items
-    if (cart.length === 0) {
-        cartItemsContainer.innerHTML = `
-            <div class="text-center py-12">
-                <span class="text-4xl block mb-3 opacity-60">🛍️</span>
-                <p class="text-stone-400 text-sm font-medium">Your basket is currently empty.</p>
-                <p class="text-stone-600 text-xs mt-1">Explore our pantry to add pure delicacies.</p>
-            </div>
-        `;
-        return;
-    }
-
-    cartItemsContainer.innerHTML = cart.map(item => `
-        <div class="cart-item">
-            <div class="flex-grow pr-3">
-                <h4 class="text-stone-100 font-semibold text-sm leading-snug">${escapeHtml(item.name)}</h4>
-                <div class="flex items-center gap-2 mt-1">
-                    <span class="text-xs text-amber-400/90 font-medium px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">${escapeHtml(item.size)}</span>
-                    <span class="text-xs text-stone-400">₹${item.price} each</span>
-                </div>
-            </div>
-            <div class="flex items-center gap-3">
-                <div class="flex items-center gap-1.5 bg-stone-900 px-2 py-1 rounded-lg border border-stone-800">
-                    <button onclick="updateQty(${item.id}, -1)" class="qty-btn" aria-label="Decrease quantity">-</button>
-                    <span class="text-xs font-bold text-stone-200 w-5 text-center">${item.qty}</span>
-                    <button onclick="updateQty(${item.id}, 1)" class="qty-btn" aria-label="Increase quantity">+</button>
-                </div>
-                <button onclick="removeItem(${item.id})" class="text-stone-500 hover:text-red-400 text-xs p-1 transition-colors" title="Remove Item">&times;</button>
-            </div>
-        </div>
-    `).join('');
-}
-
-// Badge Animation Effect
-function animateBadge() {
-    if (!cartCount) return;
-    cartCount.classList.add('cart-badge-pulse');
-    setTimeout(() => cartCount.classList.remove('cart-badge-pulse'), 300);
-}
-
-// Tagline Scroll Reveal
-function setupTaglineReveal() {
-    if (!taglineText || !taglineSection) return;
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                taglineText.classList.add('is-revealed');
+// Load Products from Firestore
+db.collection('products')
+    .orderBy('createdAt', 'desc')
+    .onSnapshot(snapshot => {
+        products = [];
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const status = data.status || 'in_stock';
+            if (status !== 'hidden') {
+                products.push({ id: doc.id, ...data, status });
             }
         });
-    }, { threshold: 0.3 });
+        renderProducts();
+    }, error => {
+        productsGrid.innerHTML = '<p class="text-center py-8 text-stone-500">Error loading products.</p>';
+    });
 
-    observer.observe(taglineSection);
+// Render Products by Category
+function renderProducts() {
+    productsGrid.innerHTML = '';
+    let filteredProducts = products;
+    
+    if (currentCategory !== 'all') {
+        filteredProducts = products.filter(p => {
+            const name = (p.name || '').toLowerCase();
+            if (currentCategory === 'ghee') return name.includes('ghee');
+            if (currentCategory === 'pickles') return name.includes('pickle');
+            if (currentCategory === 'paneer') return name.includes('paneer');
+            return true;
+        });
+    }
+    
+    filteredProducts.forEach(product => {
+        productGrid.innerHTML += generateProductCard(product);
+    });
 }
 
-// Order Checkout Modal Handler
-function handleCheckout() {
-    if (cart.length === 0) return;
+// Generate Product Card
+function generateProductCard(p) {
+    const statusClass = p.status === 'in_stock' ? 'bg-green-500/15 text-green-600' : 'bg-red-500/15 text-red-600';
+    const statusLabel = p.status === 'in_stock' ? 'In Stock' : 'Out of Stock';
+    const prices = [{ label: '250g', value: p.price250g }, { label: '500g', value: p.price500g }, { label: '1kg', value: p.price1kg }].filter(p => p.value > 0);
 
-    const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-    const itemCount = cart.reduce((sum, item) => sum + item.qty, 0);
-
-    const modalOverlay = document.createElement('div');
-    modalOverlay.className = 'fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in';
-    modalOverlay.innerHTML = `
-        <div class="bg-stone-900 border border-amber-500/30 rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative text-center">
-            <div class="w-16 h-16 bg-gradient-to-tr from-amber-500 to-yellow-400 rounded-full flex items-center justify-center text-black font-bold text-2xl mx-auto mb-4 shadow-lg shadow-amber-500/20">
-                ✓
+    return `
+        <div class="bg-brand-card rounded-2xl border border-stone-800 overflow-hidden hover:border-amber-500/40 flex flex-col">
+            <div class="h-56 bg-stone-900 flex items-center justify-center">
+                <span class="text-6xl text-amber-400 opacity-30">${getEmojiForProduct(p.name)}</span>
+                ${p.status === 'out_of_stock' ? '<span class="absolute top-4 right-4 px-2 py-1 rounded-full bg-red-500 text-white">Sold Out</span>' : ''}
             </div>
-            <h3 class="text-2xl font-serif font-bold text-white mb-2">Order Confirmed!</h3>
-            <p class="text-stone-300 text-sm mb-6">
-                Thank you for choosing <span class="text-amber-400 font-semibold">Seetha Maha Lakshmi Foods</span>. Your order of <span class="text-white font-semibold">${itemCount} item(s)</span> worth <span class="text-amber-400 font-bold">₹${total.toLocaleString('en-IN')}</span> has been received.
-            </p>
-            <div class="bg-stone-950 p-4 rounded-xl border border-stone-800 text-left mb-6 text-xs text-stone-400 space-y-1">
-                <p><strong class="text-stone-200">Delivery Status:</strong> Fresh batch preparation initiated</p>
-                <p><strong class="text-stone-200">Payment:</strong> Pay on Delivery / UPI Confirmation</p>
-                <p><strong class="text-stone-200">Brand Promise:</strong> 100% Pure & Traditional Ingredients</p>
+            <div class="p-5 flex-grow flex flex-col">
+                <h3 class="text-lg font-bold text-white mb-2">${escapeHtml(p.name)}</h3>
+                <p class="text-stone-400 text-sm mb-4">${escapeHtml(p.description)}</p>
+                <div class="mt-auto">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs px-2 py-1 rounded-full ${statusClass}">${statusLabel}</span>
+                        <span class="text-amber-400 font-bold">₹${prices[0]?.value || 0}</span>
+                    </div>
+                    ${prices.length > 0 ? `<div class="flex gap-2 mb-3">${prices.map(pr => pr.value > 0 ? `<button onclick="addToCart('${escapeHtml(p.name)}', ${pr.value}, '${pr.label}')" class="flex-1 text-xs py-1.5 rounded-lg bg-amber-500 text-black">${pr.label} - ₹${pr.value}</button>` : '').join('')}</div>` : ''}
+                    <button onclick="addToCart('${escapeHtml(p.name)}', 0, 'Contact')" class="w-full py-2 rounded-xl bg-stone-900 border border-stone-800 text-stone-300 text-sm">Add to Order</button>
+                </div>
             </div>
-            <button id="close-modal-btn" class="w-full py-3.5 rounded-xl bg-amber-500 text-black font-bold text-sm hover:bg-amber-400 transition-all">
-                Back to Pantry
-            </button>
         </div>
     `;
+}
 
-    document.body.appendChild(modalOverlay);
+function getEmojiForProduct(name) {
+    const n = (name || '').toLowerCase();
+    if (n.includes('ghee')) return '🪔';
+    if (n.includes('pickle')) return '🥭';
+    if (n.includes('paneer')) return '🧀';
+    return '🍽️';
+}
 
-    document.getElementById('close-modal-btn').onclick = () => {
-        document.body.removeChild(modalOverlay);
-        cart = [];
-        renderCart();
-        closeCart();
+// Cart & Order Functions
+window.addToCart = function(name, price, size) {
+    const cart = JSON.parse(localStorage.getItem('sml_cart') || '[]');
+    const existing = cart.find(i => i.name === name && i.size === size);
+    if (existing) existing.qty++;
+    else cart.push({ id: Date.now(), name, price, size, qty: 1 });
+    localStorage.setItem('sml_cart', JSON.stringify(cart));
+    document.getElementById('cart-count').textContent = cart.reduce((s, i) => s + i.qty, 0);
+    document.getElementById('cart-drawer').classList.add('open');
+    renderCart();
+};
+
+function renderCart() {
+    const cart = JSON.parse(localStorage.getItem('sml_cart') || '[]');
+    const container = document.getElementById('cart-items');
+    const totalEl = document.getElementById('cart-total');
+    
+    if (cart.length === 0) {
+        container.innerHTML = '<p class="text-stone-500 text-center py-8">Your cart is empty</p>';
+        totalEl.textContent = '₹0';
+        return;
+    }
+    
+    let total = 0;
+    container.innerHTML = cart.map(item => {
+        const itemTotal = item.price * item.qty;
+        total += itemTotal;
+        return `<div class="flex items-center gap-3 p-3 bg-stone-900 rounded-xl border">
+            <div class="flex-1"><p class="text-stone-200 font-medium text-sm">${escapeHtml(item.name)}</p><p class="text-xs text-amber-400">${escapeHtml(item.size)} × ${item.qty}</p></div>
+            <div class="flex items-center gap-1">
+                <button onclick="updateCartQty(${item.id}, -1)" class="p-1 rounded-lg hover:bg-amber-500/20 text-stone-400">−</button>
+                <span class="font-bold text-amber-400">₹${itemTotal.toLocaleString()}</span>
+                <button onclick="updateCartQty(${item.id}, 1)" class="p-1 rounded-lg hover:bg-amber-500/20 text-stone-400">+</button>
+            </div>
+        </div>`;
+    }).join('');
+    totalEl.textContent = `₹${total.toLocaleString('en-IN')}`;
+}
+
+window.updateCartQty = function(id, delta) {
+    let cart = JSON.parse(localStorage.getItem('sml_cart') || '[]');
+    const itemIndex = cart.findIndex(i => i.id === id);
+    if (itemIndex === -1) return;
+    cart[itemIndex].qty += delta;
+    if (cart[itemIndex].qty <= 0) cart.splice(itemIndex, 1);
+    localStorage.setItem('sml_cart', JSON.stringify(cart));
+    renderCart();
+    document.getElementById('cart-count').textContent = cart.reduce((s, i) => s + i.qty, 0);
+};
+
+window.placeOrder = async function() {
+    const cart = JSON.parse(localStorage.getItem('sml_cart') || '[]');
+    if (cart.length === 0) return;
+    
+    const order = {
+        customerName: document.getElementById('customer-name')?.value || 'Customer',
+        phone: document.getElementById('customer-phone')?.value || '',
+        address: document.getElementById('delivery-address')?.value || '',
+        paymentMode: document.getElementById('payment-mode')?.value || 'UPI',
+        items: cart.map(i => ({ name: i.name, qty: i.qty, size: i.size, price: i.price })),
+        total: cart.reduce((sum, i) => sum + (i.price * i.qty), 0),
+        status: 'Pending',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
     };
+    
+    try {
+        await db.collection('orders').add(order);
+        localStorage.removeItem('sml_cart');
+        cart.length = 0;
+        renderCart();
+        document.getElementById('cart-count').textContent = 0;
+        document.getElementById('cart-drawer').classList.remove('open');
+        alert('Order placed successfully!');
+    } catch (error) {
+        alert('Error placing order. Please try again.');
+    }
+};
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>"']/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39; }[tag]));
 }
 
-// Utility: Prevent XSS in rendered cart items
-function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-}
+// Setup
+document.getElementById('cart-backdrop')?.addEventListener('click', () => {
+    document.getElementById('cart-drawer').classList.remove('open');
+});
+document.getElementById('close-cart')?.addEventListener('click', () => {
+    document.getElementById('cart-drawer').classList.remove('open');
+});
+document.getElementById('checkout-btn')?.addEventListener('click', window.placeOrder);
+
+// Tagline Reveal
+const observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) taglineText.classList.add('is-revealed');
+}, { threshold: 0.3 });
+observer.observe(taglineSection);</arg_value>
