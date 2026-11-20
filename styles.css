@@ -1,178 +1,257 @@
 /* ==========================================================================
-   Seetha Maha Lakshmi (SML) Foods - Custom Styles & Micro-Animations
-   Theme: Warm Ivory (#FAF7F2), Deep Forest Green (#14362B), Brushed Gold (#C59B27)
+   Seetha Maha Lakshmi (SML) Foods - Luxury Artisanal Storefront Styles
+   Theme: Warm Ivory (#FFFDF5), Deep Charcoal (#0C0C0A), Brushed Gold (#D4AF37)
    ========================================================================== */
 
 :root {
-  --color-ivory: #FAF7F2;
-  --color-forest: #14362B;
-  --color-forest-dark: #0D241C;
-  --color-forest-light: #1C4D3E;
-  --color-gold: #C59B27;
-  --color-gold-light: #E0BA4E;
-  --color-gold-soft: rgba(197, 155, 39, 0.15);
-  --color-border: rgba(197, 155, 39, 0.2);
-  --color-card: #18201B;
-  --color-dark: #0F1612;
+  --color-cream: #FFFDF5;
+  --color-cream-muted: #F5F0E8;
+  --color-dark: #0C0C0A;
+  --color-dark-elevated: #141310;
+  --color-card: #1A1916;
+  --color-card-hover: #22201D;
+  --color-gold: #D4AF37;
+  --color-gold-light: #E8C56D;
+  --color-gold-dark: #B8962E;
+  --color-gold-soft: rgba(212, 175, 55, 0.15);
+  --color-border: rgba(212, 175, 55, 0.15);
   --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Base resets & typography */
+/* ==========================================================================
+   Base & Typography
+   ========================================================================== */
 html {
   background-color: var(--color-dark);
-  color: var(--color-ivory);
+  color: var(--color-cream);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
 }
 
-/* Custom Smooth Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
+body { @apply font-sans antialiased; }
 
-::-webkit-scrollbar-track {
-  background: #0B110E;
-}
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #080806; }
+::-webkit-scrollbar-thumb { background: #2a2618; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-gold); }
 
-::-webkit-scrollbar-thumb {
-  background: #1C3328;
-  border-radius: 4px;
-}
+/* Selection */
+::selection { background: var(--color-gold); color: var(--color-dark); }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-gold);
-}
+/* Focus visible */
+*:focus-visible { outline: 2px solid var(--color-gold); outline-offset: 2px; }
 
-/* Frosted Glass Navigation Bar */
-header {
-  background-color: rgba(15, 22, 18, 0.85) !important;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+/* ==========================================================================
+   Navigation
+   ========================================================================== */
+header { 
+  background-color: rgba(12, 12, 10, 0.95) !important; 
+  backdrop-filter: blur(20px); 
+  -webkit-backdrop-filter: blur(20px); 
   border-bottom: 1px solid var(--color-border) !important;
+  transition: all 300ms var(--ease-smooth);
 }
 
-/* Luxury Product Cards - Hover Lift & Border Shimmer */
-.group.bg-brand-card {
-  background-color: var(--color-card) !important;
-  border-color: rgba(197, 155, 39, 0.18) !important;
-  transition: transform 400ms var(--ease-spring), box-shadow 400ms var(--ease-spring), border-color 300ms ease;
-  will-change: transform;
+header.scrolled {
+  box-shadow: 0 4px 24px -4px rgba(0,0,0,0.4), 0 0 0 1px var(--color-border);
 }
 
-.group.bg-brand-card:hover {
-  transform: translateY(-8px);
-  border-color: var(--color-gold) !important;
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6), 0 0 25px rgba(197, 155, 39, 0.18);
-}
+/* ==========================================================================
+   Buttons & Interactive Elements
+   ========================================================================== */
+button, a { transition: all 250ms var(--ease-smooth); }
 
-/* Button & Interactive States */
-button, a {
-  transition: all 300ms var(--ease-spring);
-}
+button:active, a:active { transform: scale(0.98); }
 
-button:active, a:active {
-  transform: scale(0.98);
-}
-
-/* Primary Gold Buttons */
-button.bg-amber-500, a.bg-gradient-to-r {
-  background: linear-gradient(135deg, #E0BA4E 0%, #C59B27 100%) !important;
-  color: #0B1410 !important;
-  box-shadow: 0 4px 15px rgba(197, 155, 39, 0.25);
+/* Primary Gold Gradient Buttons */
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-gold-light) 0%, var(--color-gold) 100%) !important;
+  color: var(--color-dark) !important;
+  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
   font-weight: 600;
 }
-
-button.bg-amber-500:hover, a.bg-gradient-to-r:hover {
-  background: linear-gradient(135deg, #F3CF68 0%, #D4AF37 100%) !important;
-  box-shadow: 0 6px 22px rgba(197, 155, 39, 0.4);
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%) !important;
+  box-shadow: 0 8px 28px rgba(212, 175, 55, 0.45);
   transform: translateY(-2px);
 }
 
-/* Cart Slide-Over Drawer Transitions */
-#cart-drawer {
-  transition: opacity 350ms var(--ease-spring);
+/* Category Tabs */
+.category-tab {
+  @apply px-6 py-3 rounded-full text-sm font-medium transition-all duration-200;
+}
+.category-tab.active {
+  @apply bg-gradient-to-r from-brand-gold to-brand-gold-light text-brand-dark shadow-sm shadow-brand-gold/30;
+}
+.category-tab:not(.active) {
+  @apply bg-brand-card border border-brand-gold/20 text-brand-cream/80;
+}
+.category-tab:not(.active):hover {
+  @apply border-brand-gold bg-brand-gold/10;
 }
 
-#cart-drawer.open {
-  opacity: 1 !important;
-  pointer-events: auto !important;
+/* ==========================================================================
+   Product Cards
+   ========================================================================== */
+.product-card {
+  @apply bg-brand-card border border-brand-gold/10 rounded-2xl overflow-hidden;
+  @apply flex flex-col transition-all duration-500 var(--ease-spring);
+  @apply hover:border-brand-gold/30 hover:shadow-xl hover:shadow-brand-gold/5;
+  transform: translateY(0);
+}
+.product-card:hover { transform: translateY(-6px); }
+
+.product-card-image {
+  @apply aspect-square w-full bg-brand-dark-elevated relative overflow-hidden;
+}
+.product-card-image img {
+  @apply w-full h-full object-cover transition-transform duration-700 var(--ease-smooth);
+}
+.product-card:hover .product-card-image img { transform: scale(1.05); }
+
+.product-card-badge {
+  @apply absolute top-3 left-3 z-10 px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide;
+}
+.badge-bestseller { @apply bg-brand-gold text-brand-dark; }
+.badge-pure { @apply bg-green-500/20 text-green-400 border border-green-500/30; }
+.badge-new { @apply bg-brand-gold-light/20 text-brand-gold-light border border-brand-gold-light/30; }
+
+.product-card-content { @apply p-5 md:p-6 flex-1 flex flex-col; }
+.product-card-category { @apply text-xs text-brand-gold font-semibold uppercase tracking-wider mb-2; }
+.product-card-title { @apply font-serif text-lg md:text-xl text-brand-cream mb-2 line-clamp-1; }
+.product-card-desc { @apply text-sm text-brand-cream/50 leading-relaxed mb-4 flex-1; }
+
+/* Weight Selector Pills */
+.weight-selector { @apply flex gap-2 mb-4; }
+.weight-pill {
+  @apply flex-1 py-2.5 rounded-xl text-sm font-medium text-center transition-all duration-200;
+  @apply bg-brand-dark-elevated border border-brand-gold/10 text-brand-cream/70;
+  @apply hover:border-brand-gold/30 hover:bg-brand-gold/5;
+}
+.weight-pill.active {
+  @apply bg-gradient-to-r from-brand-gold to-brand-gold-light text-brand-dark border-transparent shadow-sm shadow-brand-gold/20;
+}
+.weight-pill:disabled { @apply opacity-40 cursor-not-allowed; }
+
+.product-card-footer { @apply mt-auto pt-4 border-t border-brand-gold/5; }
+.product-card-price-row { @apply flex items-center justify-between mb-3; }
+.product-card-price { @apply text-brand-gold font-bold text-lg; }
+.product-card-status { @apply text-xs px-2 py-1 rounded-full; }
+.status-in-stock { @apply bg-green-500/15 text-green-500; }
+.status-out-stock { @apply bg-red-500/15 text-red-500; }
+
+.btn-add-cart {
+  @apply w-full py-3 rounded-xl bg-brand-dark-elevated border border-brand-gold/20 text-brand-cream font-medium text-sm;
+  @apply hover:bg-brand-gold/10 hover:border-brand-gold/40 transition-all;
+}
+.btn-add-cart:disabled { @apply opacity-50 cursor-not-allowed; }
+.btn-add-cart.loading { @apply relative text-transparent; }
+.btn-add-cart.loading::after {
+  content: "";
+  @apply absolute inset-0 flex items-center justify-center;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'%3E%3Ccircle class='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' stroke-width='4'/%3E%3Cpath class='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'%3E%3CanimateTransform attributeName='transform' type='rotate' from='0 12 12' to='360 12 12' dur='1s' repeatCount='indefinite'/%3E%3C/path%3E%3C/svg%3E") center/contain no-repeat;
 }
 
+/* ==========================================================================
+   Cart Drawer
+   ========================================================================== */
+#cart-drawer { @apply transition-opacity duration-300; }
+#cart-drawer.open { @apply opacity-100 pointer-events-auto; }
 #cart-drawer aside {
-  background-color: #121A15 !important;
-  border-left: 1px solid var(--color-border) !important;
+  @apply bg-brand-dark-elevated border-l border-brand-gold/10;
+  transform: translateX(100%);
   transition: transform 400ms var(--ease-spring) !important;
 }
+#cart-drawer.open aside { @apply transform translate-x-0 !important; }
 
-#cart-drawer.open aside {
-  transform: translateX(0) !important;
-}
+#cart-backdrop { @apply bg-black/60 backdrop-blur-sm; }
 
-/* Cart Item Entry Styling */
+/* Cart Items */
 .cart-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px;
-  background-color: #17221C;
-  border: 1px solid rgba(197, 155, 39, 0.12);
-  border-radius: 12px;
+  @apply flex gap-4 p-4 bg-brand-card border border-brand-gold/10 rounded-xl;
   animation: cartItemFadeIn 300ms var(--ease-spring);
 }
+.cart-item-image {
+  @apply w-20 h-20 rounded-xl bg-brand-dark-elevated flex-shrink-0 overflow-hidden;
+}
+.cart-item-image img { @apply w-full h-full object-cover; }
+.cart-item-details { @apply flex-1 min-w-0; }
+.cart-item-title { @apply font-medium text-brand-cream truncate; }
+.cart-item-variant { @apply text-xs text-brand-gold font-medium mt-0.5; }
+.cart-item-price { @apply text-sm text-brand-cream/60; }
+.cart-item-controls { @apply flex items-center gap-2; }
+
+.qty-btn {
+  @apply w-8 h-8 rounded-lg bg-brand-dark-elevated border border-brand-gold/10;
+  @apply text-brand-cream font-semibold flex items-center justify-center;
+  @apply hover:bg-brand-gold/10 hover:border-brand-gold/30 hover:text-brand-gold transition-all;
+}
+.qty-btn:active { @apply scale-95; }
+
+.cart-item-subtotal { @apply text-brand-gold font-bold text-sm; }
+.btn-remove { @apply p-2 text-brand-cream/40 hover:text-red-400 transition-colors; }
 
 @keyframes cartItemFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Tagline Scroll Reveal Animation */
-#tagline-text {
-  transition: color 800ms var(--ease-spring), opacity 800ms var(--ease-spring);
+/* ==========================================================================
+   Animations
+   ========================================================================== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
-#tagline-text.is-revealed {
-  color: #FAF7F2 !important;
-  text-shadow: 0 0 35px rgba(224, 186, 78, 0.2);
+.animate-fade-in-up { animation: fadeInUp 800ms var(--ease-spring) forwards; }
+.animate-fade-in { animation: fadeIn 600ms var(--ease-smooth) forwards; }
+
+/* Stagger delays */
+.delay-1 { animation-delay: 100ms; }
+.delay-2 { animation-delay: 200ms; }
+.delay-3 { animation-delay: 300ms; }
+.delay-4 { animation-delay: 400ms; }
+.delay-5 { animation-delay: 500ms; }
+.delay-6 { animation-delay: 600ms; }
+
+/* Intersection Observer reveal */
+.reveal { opacity: 0; transform: translateY(30px); transition: all 800ms var(--ease-spring); }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* Floating animation for hero accents */
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+.animate-float { animation: float 6s ease-in-out infinite; }
+.animate-float-delayed { animation: float 6s ease-in-out infinite 2s; }
+
+/* Gold shimmer accent */
+.gold-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(212,175,55,0.1), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
 }
 
-/* Quantity Control Buttons in Cart */
-.qty-btn {
-  width: 26px;
-  height: 26px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  background-color: #202D26;
-  color: var(--color-ivory);
-  font-weight: 700;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+/* ==========================================================================
+   Form Elements
+   ========================================================================== */
+input, textarea, select {
+  @apply bg-brand-card border border-brand-gold/10 rounded-xl text-brand-cream placeholder-brand-cream/40;
+  @apply focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold;
+  @apply transition-all duration-200;
 }
+input::placeholder, textarea::placeholder { @apply text-brand-cream/40; }
 
-.qty-btn:hover {
-  background-color: var(--color-gold);
-  color: #000;
-}
-
-/* Floating Badge Glow */
-.cart-badge-pulse {
-  animation: badgePop 300ms var(--ease-spring);
-}
-
-@keyframes badgePop {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.35); }
-  100% { transform: scale(1); }
-}
-
-/* Accessibility: Reduced Motion */
+/* ==========================================================================
+   Accessibility
+   ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
     animation-duration: 0.01ms !important;
@@ -181,3 +260,23 @@ button.bg-amber-500:hover, a.bg-gradient-to-r:hover {
     scroll-behavior: auto !important;
   }
 }
+
+/* ==========================================================================
+   Utility Classes
+   ========================================================================== */
+.text-balance { text-wrap: balance; }
+.line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+.line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* Gradient text utility */
+.gradient-gold {
+  background: linear-gradient(135deg, var(--color-cream) 0%, var(--color-gold-light) 50%, var(--color-cream) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Glass morphism */
+.glass { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+.glass-card { @apply bg-brand-card/80 backdrop-blur-xl border border-brand-gold/10; }
