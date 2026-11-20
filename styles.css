@@ -280,3 +280,199 @@ input::placeholder, textarea::placeholder { @apply text-brand-cream/40; }
 /* Glass morphism */
 .glass { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
 .glass-card { @apply bg-brand-card/80 backdrop-blur-xl border border-brand-gold/10; }
+
+/* ==========================================================================
+   3D Virtual Store Styles
+   ========================================================================== */
+
+/* Canvas Container */
+#store3d-container {
+  position: relative;
+  overflow: hidden;
+}
+
+#store3d-canvas {
+  display: block;
+  touch-action: none; /* Prevent scrolling on canvas for mobile */
+}
+
+/* Loading Overlay */
+#store3d-loading {
+  z-index: 10;
+  transition: opacity 300ms var(--ease-smooth), visibility 300ms;
+}
+#store3d-loading.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Shelf Navigation */
+.shelf-nav-btn {
+  @apply w-12 h-12 flex items-center justify-center;
+  transition: all 200ms var(--ease-smooth);
+}
+.shelf-nav-btn:hover {
+  @apply bg-brand-gold/20 border-brand-gold/50 scale-105;
+}
+.shelf-nav-btn:active {
+  @apply scale-95;
+}
+
+#shelf-indicator {
+  @apply flex gap-1.5;
+}
+
+.shelf-dot {
+  @apply w-2.5 h-2.5 rounded-full bg-brand-cream/30;
+  transition: all 300ms var(--ease-spring);
+}
+.shelf-dot.active {
+  @apply bg-brand-gold w-8 rounded-full;
+}
+.shelf-dot[role="tab"] {
+  cursor: pointer;
+}
+
+/* Product Tooltip */
+#product-tooltip {
+  @apply px-4 py-2.5 rounded-xl bg-brand-dark-elevated/95 backdrop-blur-xl border border-brand-gold/20 text-sm;
+  @apply shadow-xl shadow-brand-gold/5;
+  pointer-events: none;
+  transform: translate(-50%, -120%);
+  white-space: nowrap;
+  z-index: 20;
+}
+#product-tooltip .tooltip-name {
+  @apply font-semibold text-brand-cream block;
+}
+#product-tooltip .tooltip-price {
+  @apply text-brand-gold font-bold text-lg;
+}
+#product-tooltip .tooltip-category {
+  @apply text-xs text-brand-cream/50 uppercase tracking-wider;
+}
+
+/* View Toggle Button */
+#view-toggle-btn {
+  transition: all 250ms var(--ease-smooth);
+}
+#view-toggle-btn:hover {
+  @apply border-brand-gold/50 bg-brand-gold/10;
+}
+#view-toggle-btn[aria-pressed="true"] {
+  @apply bg-gradient-to-r from-brand-gold to-brand-gold-light text-brand-dark border-transparent;
+}
+
+/* Exit 3D Button */
+#exit-3d-btn {
+  transition: all 250ms var(--ease-smooth);
+}
+
+/* Inspection Overlay */
+#product-inspection-overlay {
+  @apply transition-opacity duration-300;
+}
+#inspection-backdrop {
+  @apply transition-opacity duration-300;
+}
+#inspection-panel {
+  @apply transform transition-all duration-300 var(--ease-spring);
+  opacity: 0;
+  scale: 0.95;
+}
+#product-inspection-overlay:not(.hidden) #inspection-panel {
+  opacity: 1;
+  scale: 1;
+}
+
+/* Inspection Content Styles */
+.inspection-grid {
+  @apply grid lg:grid-cols-2 gap-6 items-start;
+}
+
+.inspection-3d-viewer {
+  @apply relative aspect-square bg-brand-card rounded-xl border border-brand-gold/10 overflow-hidden;
+}
+
+.inspection-3d-viewer canvas {
+  @apply w-full h-full;
+  touch-action: none;
+}
+
+.inspection-details {
+  @apply space-y-5;
+}
+
+.inspection-detail-row {
+  @apply flex items-center justify-between py-3 border-b border-brand-gold/5;
+}
+
+.inspection-detail-label {
+  @apply text-sm text-brand-cream/60;
+}
+
+.inspection-detail-value {
+  @apply font-semibold text-brand-cream;
+}
+
+.inspection-weight-selector {
+  @apply flex flex-wrap gap-2;
+}
+
+.inspection-weight-pill {
+  @apply px-4 py-2.5 rounded-xl text-sm font-medium text-center transition-all duration-200;
+  @apply bg-brand-dark-elevated border border-brand-gold/10 text-brand-cream/70;
+  @apply hover:border-brand-gold/30 hover:bg-brand-gold/5;
+}
+.inspection-weight-pill.active {
+  @apply bg-gradient-to-r from-brand-gold to-brand-gold-light text-brand-dark border-transparent shadow-sm shadow-brand-gold/20;
+}
+
+.inspection-add-btn {
+  @apply w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-gold to-brand-gold-light text-brand-dark font-semibold text-base shadow-lg shadow-brand-gold/30 hover:from-brand-gold-light hover:to-brand-gold hover:-translate-y-0.5 hover:shadow-brand-gold/50 transition-all duration-300 flex items-center justify-center gap-2;
+}
+.inspection-add-btn:disabled {
+  @apply opacity-50 cursor-not-allowed hover:transform-none;
+}
+
+.inspection-description {
+  @apply text-brand-cream/70 leading-relaxed text-sm pt-4 border-t border-brand-gold/10;
+}
+
+/* Mobile 3D Store View */
+@media (max-width: 1023px) {
+  #store3d-container.lg\:hidden {
+    display: block;
+  }
+  
+  #store3d-canvas {
+    height: 50vh;
+    min-height: 350px;
+  }
+  
+  .shelf-nav-btn {
+    @apply w-10 h-10;
+  }
+}
+
+/* 3D Store Hidden State */
+#store3d-container.hidden {
+  display: none !important;
+}
+
+/* Standard Products View Hidden State */
+#standard-products-view.hidden {
+  display: none !important;
+}
+
+/* Reduced Motion for 3D */
+@media (prefers-reduced-motion: reduce) {
+  #store3d-canvas,
+  .inspection-3d-viewer canvas {
+    animation: none !important;
+  }
+  .shelf-dot.active {
+    transition: none !important;
+  }
+}
