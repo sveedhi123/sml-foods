@@ -78,7 +78,7 @@ const DEFAULT_PRODUCTS = [
     id: 'pickle-avakaya',
     name: 'Avakaya Mango Pickle',
     category: 'pickles',
-    description: 'Andhra\'s crown jewel — raw Rajapuri mangoes hand-cut, layered with kachi ghani mustard oil, rock salt, red chili, mustard, methi, and turmeric. Sun-cured 21 days on cotton cloth. No vinegar, no water.',
+    description: "Andhra's crown jewel — raw Rajapuri mangoes hand-cut, layered with kachi ghani mustard oil, rock salt, red chili, mustard, methi, and turmeric. Sun-cured 21 days on cotton cloth. No vinegar, no water.",
     shortDesc: 'Raw Rajapuri mango, 21-day sun cure, kachi ghani oil',
     image: 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=600&q=80',
     imageHover: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=600&q=80',
