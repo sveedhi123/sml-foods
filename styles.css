@@ -1,0 +1,183 @@
+/* ==========================================================================
+   Seetha Maha Lakshmi (SML) Foods - Custom Styles & Micro-Animations
+   Theme: Warm Ivory (#FAF7F2), Deep Forest Green (#14362B), Brushed Gold (#C59B27)
+   ========================================================================== */
+
+:root {
+  --color-ivory: #FAF7F2;
+  --color-forest: #14362B;
+  --color-forest-dark: #0D241C;
+  --color-forest-light: #1C4D3E;
+  --color-gold: #C59B27;
+  --color-gold-light: #E0BA4E;
+  --color-gold-soft: rgba(197, 155, 39, 0.15);
+  --color-border: rgba(197, 155, 39, 0.2);
+  --color-card: #18201B;
+  --color-dark: #0F1612;
+  --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Base resets & typography */
+html {
+  background-color: var(--color-dark);
+  color: var(--color-ivory);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Smooth Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0B110E;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1C3328;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold);
+}
+
+/* Frosted Glass Navigation Bar */
+header {
+  background-color: rgba(15, 22, 18, 0.85) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--color-border) !important;
+}
+
+/* Luxury Product Cards - Hover Lift & Border Shimmer */
+.group.bg-brand-card {
+  background-color: var(--color-card) !important;
+  border-color: rgba(197, 155, 39, 0.18) !important;
+  transition: transform 400ms var(--ease-spring), box-shadow 400ms var(--ease-spring), border-color 300ms ease;
+  will-change: transform;
+}
+
+.group.bg-brand-card:hover {
+  transform: translateY(-8px);
+  border-color: var(--color-gold) !important;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6), 0 0 25px rgba(197, 155, 39, 0.18);
+}
+
+/* Button & Interactive States */
+button, a {
+  transition: all 300ms var(--ease-spring);
+}
+
+button:active, a:active {
+  transform: scale(0.98);
+}
+
+/* Primary Gold Buttons */
+button.bg-amber-500, a.bg-gradient-to-r {
+  background: linear-gradient(135deg, #E0BA4E 0%, #C59B27 100%) !important;
+  color: #0B1410 !important;
+  box-shadow: 0 4px 15px rgba(197, 155, 39, 0.25);
+  font-weight: 600;
+}
+
+button.bg-amber-500:hover, a.bg-gradient-to-r:hover {
+  background: linear-gradient(135deg, #F3CF68 0%, #D4AF37 100%) !important;
+  box-shadow: 0 6px 22px rgba(197, 155, 39, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Cart Slide-Over Drawer Transitions */
+#cart-drawer {
+  transition: opacity 350ms var(--ease-spring);
+}
+
+#cart-drawer.open {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+#cart-drawer aside {
+  background-color: #121A15 !important;
+  border-left: 1px solid var(--color-border) !important;
+  transition: transform 400ms var(--ease-spring) !important;
+}
+
+#cart-drawer.open aside {
+  transform: translateX(0) !important;
+}
+
+/* Cart Item Entry Styling */
+.cart-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background-color: #17221C;
+  border: 1px solid rgba(197, 155, 39, 0.12);
+  border-radius: 12px;
+  animation: cartItemFadeIn 300ms var(--ease-spring);
+}
+
+@keyframes cartItemFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Tagline Scroll Reveal Animation */
+#tagline-text {
+  transition: color 800ms var(--ease-spring), opacity 800ms var(--ease-spring);
+}
+
+#tagline-text.is-revealed {
+  color: #FAF7F2 !important;
+  text-shadow: 0 0 35px rgba(224, 186, 78, 0.2);
+}
+
+/* Quantity Control Buttons in Cart */
+.qty-btn {
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background-color: #202D26;
+  color: var(--color-ivory);
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.qty-btn:hover {
+  background-color: var(--color-gold);
+  color: #000;
+}
+
+/* Floating Badge Glow */
+.cart-badge-pulse {
+  animation: badgePop 300ms var(--ease-spring);
+}
+
+@keyframes badgePop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+/* Accessibility: Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
