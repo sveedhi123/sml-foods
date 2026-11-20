@@ -1,6 +1,7 @@
 /**
  * SML Foods Admin Dashboard Logic
  * Firebase Auth + Firestore for Product Management & Live Orders
+ * Supports 3D model URLs, shelf positions, weight variants
  */
 
 // Firebase Configuration
@@ -20,6 +21,7 @@ if (!firebase.apps.length) {
 }
 const auth = firebase.auth();
 const db = firebase.firestore();
+const storage = firebase.storage();
 
 // DOM Elements
 const loginModal = document.getElementById('login-modal');
@@ -31,9 +33,13 @@ const productGrid = document.getElementById('product-grid');
 const mobileMenu = document.getElementById('mobile-menu');
 const ordersSection = document.getElementById('orders-section');
 const ordersTable = document.getElementById('orders-table');
+const closeModalTop = document.getElementById('close-modal-top');
+const variantsContainer = document.getElementById('variants-container');
+const addVariantBtn = document.getElementById('add-variant-btn');
 
 // Current Product Being Edited
 let editingProduct = null;
+let variantCounter = 0;
 
 // Initialize App
 document.addEventListener('DOMContentLoaded', () => {
@@ -94,13 +100,19 @@ if (loginForm) {
 // Product Manager Functions
 function setupEventListeners() {
     addProductBtn?.addEventListener('click', openAddProductModal);
+    closeModalTop?.addEventListener('click', closeProductModal);
     document.getElementById('cancel-product')?.addEventListener('click', closeProductModal);
     productForm?.addEventListener('submit', handleProductSubmit);
+    addVariantBtn?.addEventListener('click', addVariantField);
 }
 
 function openAddProductModal() {
     editingProduct = null;
     if (productForm) productForm.reset();
+    if (variantsContainer) variantsContainer.innerHTML = '';
+    variantCounter = 0;
+    addVariantField(); // Add first variant by default
+    
     const modalTitle = document.getElementById('modal-title');
     if (modalTitle) modalTitle.textContent = 'Add Product';
     if (productModal) productModal.classList.remove('hidden');
@@ -109,6 +121,8 @@ function openAddProductModal() {
 function closeProductModal() {
     editingProduct = null;
     if (productForm) productForm.reset();
+    if (variantsContainer) variantsContainer.innerHTML = '';
+    variantCounter = 0;
     if (productModal) productModal.classList.add('hidden');
 }
 
@@ -154,6 +168,10 @@ function generateProductCard(data, id) {
         'hidden': 'bg-gray-500/15 text-gray-600'
     }[data.status] || 'bg-green-500/15 text-green-600';
 
+    const badge = data.badge ? `<span class="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-gold/20 text-forest-dark mr-1 mb-1">${escapeHtml(data.badge)}</span>` : '';
+    const shelfPos = data.shelfPosition ? `<span class="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-forest-light text-forest-dark mr-1 mb-1">${escapeHtml(data.shelfPosition)}</span>` : '';
+    const modelUrl = data.modelUrl ? `<span class="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-blue-500/20 text-blue-600 mr-1 mb-1">3D Model</span>` : '';
+
     return `
         <div class="bg-white rounded-2xl border border-forest-light p-5 hover:shadow-lg transition-shadow">
             <div class="flex justify-between items-start mb-4">
@@ -167,14 +185,28 @@ function generateProductCard(data, id) {
                     </button>
                 </div>
             </div>
-            <p class="text-forest-dark/70 text-sm mb-4">${escapeHtml(data.description || '')}</p>
+            <p class="text-forest-dark/70 text-sm mb-3">${escapeHtml(data.description || '')}</p>
+            
+            <div class="flex flex-wrap gap-1.5 mb-3">
+                ${badge}
+                ${shelfPos}
+                ${modelUrl}
+            </div>
+            
             <div class="border-t border-forest-light pt-4 mb-4">
                 <div class="flex flex-wrap gap-2 text-xs font-semibold">
-                    ${data.price250g ? `<span class="bg-gold/15 px-2.5 py-1 rounded-full text-forest-dark">250g: ₹${data.price250g}</span>` : ''}
-                    ${data.price500g ? `<span class="bg-gold/15 px-2.5 py-1 rounded-full text-forest-dark">500g: ₹${data.price500g}</span>` : ''}
-                    ${data.price1kg ? `<span class="bg-gold/15 px-2.5 py-1 rounded-full text-forest-dark">1kg: ₹${data.price1kg}</span>` : ''}
+                    ${data.variants && data.variants.length > 0 ? data.variants.map(v => 
+                        `<span class="bg-gold/15 px-2.5 py-1 rounded-full text-forest-dark">${escapeHtml(v.weight)}: ₹${v.price}${!v.inStock ? ' (OOS)' : ''}</span>`
+                    ).join('') : (
+                        (data.price250g ? `<span class="bg-gold/15 px-2.5 py-1 rounded-full text-forest-dark">250g: ₹${data.price250g}</span>` : '') +
+                        (data.price500g ? `<span class="bg-gold/15 px-2.5 py-1 rounded-full text-forest-dark">500g: ₹${data.price500g}</span>` : '') +
+                        (data.price1kg ? `<span class="bg-gold/15 px-2.5 py-1 rounded-full text-forest-dark">1kg: ₹${data.price1kg}</span>` : '')
+                    )}
                 </div>
             </div>
+            
+            ${data.tags ? `<div class="flex flex-wrap gap-1 mb-3">${data.tags.split(',').map(t => `<span class="px-2 py-0.5 rounded text-[10px] bg-forest-light text-forest-dark">${escapeHtml(t.trim())}</span>`).join('')}</div>` : ''}
+            
             <div class="flex justify-between items-center pt-2">
                 <span class="text-xs px-3 py-1 rounded-full font-medium ${statusBg}">${statusLabel}</span>
                 <select onchange="updateProductStatus('${id}', this.value)" class="text-xs px-2 py-1 rounded-lg border border-forest-light bg-white focus:outline-none focus:ring-1 focus:ring-gold">
@@ -187,6 +219,45 @@ function generateProductCard(data, id) {
     `;
 }
 
+// Variant Management
+function addVariantField(variant = null) {
+    if (!variantsContainer) return;
+    
+    const index = variantCounter++;
+    const weight = variant?.weight || '';
+    const price = variant?.price || '';
+    const inStock = variant?.inStock !== false;
+    
+    const div = document.createElement('div');
+    div.className = 'flex gap-2 items-end variant-row';
+    div.dataset.index = index;
+    div.innerHTML = `
+        <div class="flex-1">
+            <label class="block text-xs text-forest-dark/60 mb-1">Weight/Size</label>
+            <input type="text" name="variant-weight-${index}" value="${escapeHtml(weight)}" placeholder="e.g., 250ml, 500g" class="w-full px-3 py-2 rounded-xl border border-forest-light bg-white focus:ring-1 focus:ring-gold">
+        </div>
+        <div class="flex-1">
+            <label class="block text-xs text-forest-dark/60 mb-1">Price (₹)</label>
+            <input type="number" name="variant-price-${index}" value="${price}" min="0" step="1" placeholder="0" class="w-full px-3 py-2 rounded-xl border border-forest-light bg-white focus:ring-1 focus:ring-gold">
+        </div>
+        <div class="flex items-center gap-2">
+            <label class="flex items-center gap-1.5 text-sm text-forest-dark cursor-pointer">
+                <input type="checkbox" name="variant-instock-${index}" ${inStock ? 'checked' : ''} class="rounded border-forest-light text-gold focus:ring-gold">
+                <span>In Stock</span>
+            </label>
+        </div>
+        <button type="button" onclick="removeVariantField(${index})" class="p-2 rounded-lg hover:bg-gold/10 text-red-600" title="Remove variant">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+    `;
+    variantsContainer.appendChild(div);
+}
+
+window.removeVariantField = function(index) {
+    const row = variantsContainer?.querySelector(`[data-index="${index}"]`);
+    if (row) row.remove();
+};
+
 // Edit Product
 window.editProduct = async function(id) {
     try {
@@ -198,19 +269,31 @@ window.editProduct = async function(id) {
         
         const modalTitle = document.getElementById('modal-title');
         if (modalTitle) modalTitle.textContent = 'Edit Product';
-
+        
         document.getElementById('product-name').value = data.name || '';
         document.getElementById('product-desc').value = data.description || '';
-        document.getElementById('price-250g').value = data.price250g || '';
-        document.getElementById('price-500g').value = data.price500g || '';
-        document.getElementById('price-1kg').value = data.price1kg || '';
+        document.getElementById('product-category').value = data.category || 'ghee';
+        document.getElementById('product-model-url').value = data.modelUrl || '';
+        document.getElementById('product-shelf-position').value = data.shelfPosition || 'ghee';
+        document.getElementById('product-image').value = data.image || '';
+        document.getElementById('product-image-hover').value = data.imageHover || '';
+        document.getElementById('product-status').value = data.status || 'in_stock';
+        document.getElementById('product-badge').value = data.badge || '';
+        document.getElementById('product-date').value = data.churnDate || data.cureDate || data.madeDate || '';
+        document.getElementById('product-tags').value = data.tags ? data.tags.join(', ') : '';
         
-        const statusSelect = document.getElementById('product-status');
-        if (statusSelect) {
-            let statusVal = data.status || 'in_stock';
-            if (statusVal === 'Available') statusVal = 'in_stock';
-            if (statusVal === 'Out of Stock') statusVal = 'out_of_stock';
-            statusSelect.value = statusVal;
+        // Load variants
+        if (variantsContainer) variantsContainer.innerHTML = '';
+        variantCounter = 0;
+        
+        if (data.variants && data.variants.length > 0) {
+            data.variants.forEach(v => addVariantField(v));
+        } else {
+            // Legacy price fields fallback
+            document.getElementById('price-250g').value = data.price250g || '';
+            document.getElementById('price-500g').value = data.price500g || '';
+            document.getElementById('price-1kg').value = data.price1kg || '';
+            addVariantField(); // Add at least one
         }
         
         if (productModal) productModal.classList.remove('hidden');
@@ -253,15 +336,55 @@ window.toggleStatus = async function(id, currentStatus) {
 async function handleProductSubmit(e) {
     e.preventDefault();
     
+    // Collect variants
+    const variants = [];
+    const variantRows = variantsContainer?.querySelectorAll('.variant-row') || [];
+    
+    variantRows.forEach((row, i) => {
+        const weight = row.querySelector(`[name="variant-weight-${i}"]`)?.value?.trim();
+        const price = parseFloat(row.querySelector(`[name="variant-price-${i}"]`)?.value) || 0;
+        const inStock = row.querySelector(`[name="variant-instock-${i}"]`)?.checked !== false;
+        
+        if (weight && price > 0) {
+            variants.push({ weight, price, inStock });
+        }
+    });
+    
+    // Fallback to legacy price fields if no variants
+    let legacyPrices = {};
+    if (variants.length === 0) {
+        legacyPrices = {
+            price250g: parseFloat(document.getElementById('price-250g').value) || 0,
+            price500g: parseFloat(document.getElementById('price-500g').value) || 0,
+            price1kg: parseFloat(document.getElementById('price-1kg').value) || 0
+        };
+    }
+    
+    const category = document.getElementById('product-category').value;
+    const dateField = category === 'ghee' ? 'churnDate' : category === 'pickles' ? 'cureDate' : 'madeDate';
+    
     const productData = {
         name: document.getElementById('product-name').value.trim(),
         description: document.getElementById('product-desc').value.trim(),
-        price250g: parseFloat(document.getElementById('price-250g').value) || 0,
-        price500g: parseFloat(document.getElementById('price-500g').value) || 0,
-        price1kg: parseFloat(document.getElementById('price-1kg').value) || 0,
-        status: document.getElementById('product-status')?.value || 'in_stock',
-        createdAt: editingProduct ? editingProduct.createdAt : firebase.firestore.FieldValue.serverTimestamp()
+        category,
+        image: document.getElementById('product-image').value.trim(),
+        imageHover: document.getElementById('product-image-hover').value.trim(),
+        modelUrl: document.getElementById('product-model-url').value.trim(),
+        shelfPosition: document.getElementById('product-shelf-position').value,
+        badge: document.getElementById('product-badge').value,
+        status: document.getElementById('product-status').value,
+        tags: document.getElementById('product-tags').value.split(',').map(t => t.trim()).filter(Boolean),
+        variants: variants.length > 0 ? variants : undefined,
+        [dateField]: document.getElementById('product-date').value || null,
+        createdAt: editingProduct ? editingProduct.createdAt : firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        ...legacyPrices
     };
+    
+    // Remove undefined fields
+    Object.keys(productData).forEach(key => {
+        if (productData[key] === undefined) delete productData[key];
+    });
     
     try {
         if (editingProduct) {
@@ -344,7 +467,7 @@ window.updateOrderStatus = async function(id, status) {
 // Utility Functions
 function escapeHtml(str) {
     if (!str) return '';
-    return str.replace(/[&<>"']/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[tag]));
+    return str.replace(/[&<>\"']/g, tag => ({ '&': '&', '<': '<', '>': '>', '\"': '"', \"'\": ''' }[tag]));
 }
 
 function getTimeAgo(date) {
