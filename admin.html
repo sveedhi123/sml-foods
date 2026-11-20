@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard — SML Foods</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Manrope', 'sans-serif'], serif: ['Playfair Display', 'serif'] },
+                    colors: {
+                        ivory: '#FAF7F2', forest: '#14362B', gold: '#C59B27',
+                        'forest-dark': '#0D241C', 'forest-light': '#1C4D3E', 'glass': 'rgba(250, 247, 242, 0.15)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap');
+    </style>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-ivory text-forest min-h-screen font-sans antialiased">
+    <!-- Login Modal -->
+    <div id="login-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
+            <h2 class="text-2xl font-serif font-bold text-forest-dark mb-6 text-center">Admin Access</h2>
+            <form id="login-form">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-forest-dark mb-1.5">Email</label>
+                    <input type="email" id="email" required class="w-full px-4 py-2.5 rounded-xl border border-forest-light bg-white focus:ring-2 focus:ring-gold focus:border-transparent">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-forest-dark mb-1.5">Password</label>
+                    <input type="password" id="password" required class="w-full px-4 py-2.5 rounded-xl border border-forest-light bg-white focus:ring-2 focus:ring-gold focus:border-transparent">
+                </div>
+                <button type="submit" class="w-full py-3.5 rounded-xl bg-gold text-forest-dark font-bold text-base hover:opacity-95 transition-all">Sign In</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Layout -->
+    <div class="min-h-screen flex">
+        <!-- Sidebar -->
+        <aside class="hidden xl:block w-64 bg-white border-r border-forest-light h-screen">
+            <div class="p-6 border-b border-forest-light">
+                <h1 class="text-2xl font-serif font-bold text-forest">SML Admin</h1>
+            </div>
+            <nav class="p-4 space-y-2">
+                <a href="#products" class="block px-3.5 py-2.5 rounded-xl text-sm font-medium text-forest-dark hover:bg-gold/10 hover:text-forest transition-all">Product Manager</a>
+                <a href="#orders" class="block px-3.5 py-2.5 rounded-xl text-sm font-medium text-forest-dark hover:bg-gold/10 hover:text-forest transition-all">Live Orders</a>
+                <a href="#analytics" class="block px-3.5 py-2.5 rounded-xl text-sm font-medium text-forest-dark hover:bg-gold/10 hover:text-forest transition-all">Analytics</a>
+            </nav>
+        </aside>
+
+        <!-- Mobile Top Nav -->
+        <header class="xl:hidden flex justify-between items-center p-4 bg-white border-b border-forest-light">
+            <h1 class="text-xl font-serif font-bold text-forest">SML Admin</h1>
+            <button id="mobile-menu" class="p-2 rounded-lg hover:bg-gold/10"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 xl:p-10">
+            <!-- Product Manager Section -->
+            <section id="products-section">
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h2 class="text-3xl font-serif font-bold text-forest-dark mb-2">Product Manager</h2>
+                        <p class="text-forest-dark/70">Add, edit, or remove products from your menu</p>
+                    </div>
+                    <button id="add-product-btn" class="px-5 py-2.5 rounded-xl bg-gold text-forest-dark font-semibold text-sm hover:opacity-95 transition-all">
+                        + Add Product
+                    </button>
+                </div>
+
+                <!-- Product Grid -->
+                <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Products will be rendered here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Add/Edit Product Modal -->
+    <div id="product-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
+            <h3 id="modal-title" class="text-xl font-serif font-bold text-forest-dark mb-5">Add Product</h3>
+            <form id="product-form">
+                <input type="hidden" id="product-id">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-forest-dark mb-1.5">Product Name</label>
+                        <input type="text" id="product-name" required class="w-full px-4 py-2.5 rounded-xl border border-forest-light bg-white focus:ring-2 focus:ring-gold">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-forest-dark mb-1.5">Description</label>
+                        <textarea id="product-desc" rows="3" class="w-full px-4 py-2.5 rounded-xl border border-forest-light bg-white focus:ring-2 focus:ring-gold resize-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-forest-dark mb-1.5">Price (₹)</label>
+                        <div class="grid grid-cols-3 gap-3">
+                            <div><input type="number" id="price-250g" min="0" placeholder="250g" class="w-full px-3 py-2 rounded-xl border border-forest-light bg-white focus:ring-1 focus:ring-gold"></div>
+                            <div><input type="number" id="price-500g" min="0" placeholder="500g" class="w-full px-3 py-2 rounded-xl border border-forest-light bg-white focus:ring-1 focus:ring-gold"></div>
+                            <div><input type="number" id="price-1kg" min="0" placeholder="1kg" class="w-full px-3 py-2 rounded-xl border border-forest-light bg-white focus:ring-1 focus:ring-gold"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-forest-dark mb-1.5">Status</label>
+                        <select id="product-status" class="w-full px-3 py-2.5 rounded-xl border border-forest-light bg-white focus:ring-2 focus:ring-gold">
+                            <option value="Available">Available</option>
+                            <option value="Out of Stock">Out of Stock</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3 mt-6">
+                    <button type="button" id="cancel-product" class="px-5 py-2.5 rounded-xl border border-forest-dark/30 text-forest-dark hover:bg-forest-light transition-all">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-gold text-forest-dark font-semibold hover:opacity-95 transition-all">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Live Orders Section -->
+    <section id="orders-section" class="hidden">
+        <div class="mb-8">
+            <h2 class="text-3xl font-serif font-bold text-forest-dark mb-2">Live Orders</h2>
+            <p class="text-forest-dark/70">Real-time order tracking and management</p>
+        </div>
+        <div id="orders-table">
+            <!-- Orders rendered here -->
+        </div>
+    </section>
+
+    <script src="admin.js"></script>
+</body>
+</html>
