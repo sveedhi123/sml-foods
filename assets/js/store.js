@@ -96,9 +96,10 @@
     $("#contactList").innerHTML = rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
 
     const D = window.SML.DEFAULT_SETTINGS;
-    setImg("#heroImg", s.heroImage || D.heroImage, "Andhra pickles in clay pots with raw mangoes and chillies", { sizes: "100vw", widths: [800, 1280, 1920, 2400], eager: true });
+    setImg("#heroImg", s.heroImage || D.heroImage, "Pickles in clay jars with raw mangoes and chillies", { sizes: "(max-width: 980px) 100vw, 580px", widths: [600, 900, 1200, 1600], ratio: 0.8, eager: true });
     setImg("#storyImg", s.storyImage || D.storyImage, "Paddy fields and coconut palms in Konaseema", { sizes: "100vw", widths: [800, 1280, 1920, 2400] });
     const pm = $("#promiseMedia");
+    if (!pm) return;
     const k = [s.promiseImage || D.promiseImage, s.promiseImage2 || D.promiseImage2].join("|");
     if (pm.dataset.k !== k) {
       pm.dataset.k = k;
@@ -116,6 +117,7 @@
 
   function renderCats() {
     const defs = window.SML.DEFAULT_CATEGORIES;
+    if (!$("#cats")) return;
     $("#cats").innerHTML = S.categories.map((c, i) => {
       const first = S.products.find((p) => p.category === c.id && p.status === "active" && (p.images || []).length) || S.products.find((p) => p.category === c.id);
       const url = c.image || (defs.find((x) => x.id === c.id) || {}).image || (first && (first.images || [])[0]);
@@ -128,6 +130,7 @@
   }
 
   function renderFeatured() {
+    if (!$("#featured")) return;
     let list = S.products.filter((p) => p.featured && p.status === "active");
     if (list.length < 4) list = list.concat(S.products.filter((p) => p.status === "active" && !list.includes(p))).slice(0, 4);
     $("#featured").innerHTML = list.slice(0, 4).map(cardHtml).join("");
@@ -217,8 +220,8 @@
         <button class="icon-btn close" data-close aria-label="Close">✕</button>
         <span class="card-te">${esc(p.nameTe)}</span>
         <h2 id="pmTitle">${esc(p.nameEn)}</h2>
-        ${soon ? `<p class="note">Coming soon — message us on WhatsApp to be notified.</p>` : ""}
-        ${p.localOnly ? `<p class="note green">Fresh product — delivered only to nearby pincodes${S.settings.localPincodes ? ` (starting ${esc(prefixes(S.settings.localPincodes).join(", "))})` : ""}.</p>` : ""}
+        ${soon ? `<p class="note">త్వరలో వస్తుంది. Coming soon. Message us on WhatsApp to be told when it is ready.</p>` : ""}
+        ${p.localOnly ? `<p class="note green">Fresh product. Delivered only to nearby pincodes${S.settings.localPincodes ? ` (starting ${esc(prefixes(S.settings.localPincodes).join(", "))})` : ""}.</p>` : ""}
         <div class="price" id="pmPrice">${priceHtml(v)}</div>
         <div class="sizes" role="group" aria-label="Size">${(p.variants || []).map((x) => `<button class="size" data-pm-size="${esc(x.id)}" aria-pressed="${x.id === (v && v.id)}" ${!variantAvailable(x) || soon ? "disabled" : ""}>${esc(x.label)}</button>`).join("")}</div>
         <div class="pm-buy">
@@ -466,7 +469,7 @@
       q.make();
       box.innerHTML = q.createSvgTag({ cellSize: 6, margin: 2, scalable: true });
     } else if (tries < 20) setTimeout(() => renderQr(link, tries + 1), 250);
-    else box.innerHTML = `<p class="muted" style="font-size:13px;text-align:center">QR unavailable — pay to the UPI ID shown.</p>`;
+    else box.innerHTML = `<p class="muted" style="font-size:13px;text-align:center">QR unavailable. Please pay to the UPI ID shown.</p>`;
   }
 
   async function placeOrder() {
@@ -508,7 +511,7 @@
       const reused = e && e.code === "permission-denied";
       const msg = reused
         ? "We couldn't place this order. This transaction ID may already be used for another order, or the store is closed right now. Please check the number, or send the order to us on WhatsApp."
-        : "We couldn't reach our server. Your payment is safe — please send this order to us on WhatsApp and we'll confirm it.";
+        : "We couldn't reach our server. Your payment is safe. Please send this order to us on WhatsApp and we'll confirm it.";
       err.innerHTML = `${esc(msg)}${S.settings.whatsapp ? ` <a href="${waLink(S.settings.whatsapp, orderMessage(order))}" target="_blank" rel="noopener">Send on WhatsApp</a>` : ""}`;
     }
   }

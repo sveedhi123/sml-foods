@@ -642,9 +642,6 @@
         <p class="section-label">Homepage photos <span class="muted" style="text-transform:none;letter-spacing:0;font-weight:400">(paste an image link — Unsplash links are resized automatically)</span></p>
         <div class="grid2">
           ${f("heroImage", "Top banner photo")}
-          ${f("storyImage", "Konaseema story photo")}
-          ${f("promiseImage", "Promise section photo (tall)")}
-          ${f("promiseImage2", "Promise section small photo")}
         </div>
       </div>
       <div class="panel">

@@ -1,6 +1,6 @@
 # SML Foods — Seetha Maha Lakshmi (సీత మహాలక్ష్మి)
 
-Online shop for **buffalo ghee, Andhra pickles and fresh paneer**, made at Tatipaka, Konaseema.
+Online shop for **buffalo ghee, Andhra pickles and fresh paneer**, made in Konaseema.
 
 - **Shop:** `index.html`. Fast, clean and mobile-first. Product names in Telugu + English, sizes, cart and checkout.
 - **Payment:** direct UPI to your own UPI ID, with **₹0 gateway fees**. The customer pays from any UPI app and enters the 12-digit UTR; you confirm it in Admin.
