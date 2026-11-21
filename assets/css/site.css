@@ -78,7 +78,7 @@ p { margin: 0 0 1em; }
 .announce { background: var(--brand-ink); color: #EADFC4; text-align: center; font-size: 12.5px; padding: 9px 16px; letter-spacing: .08em; }
 .announce:empty { display: none; }
 .header { position: sticky; top: 0; z-index: 40; transition: background .35s var(--ease), box-shadow .35s, border-color .35s; border-bottom: 1px solid transparent; }
-.header.over { position: absolute; left: 0; right: 0; background: transparent; color: #fff; }
+.header.over { position: absolute; top: auto; left: 0; right: 0; background: transparent; color: #fff; }
 .header.scrolled { position: fixed; top: 0; left: 0; right: 0; background: rgba(251, 247, 238, .94); color: var(--ink); backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px); border-color: var(--line); box-shadow: 0 6px 24px rgba(31, 26, 20, .06); }
 .header:not(.over) { background: rgba(251, 247, 238, .96); }
 .header-in { display: flex; align-items: center; gap: 28px; height: 80px; }
