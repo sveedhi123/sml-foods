@@ -172,11 +172,20 @@
     return `${inr(v.price)}${perKg(v.label) ? `<small class="unit">/kg</small>` : ""}${mrp}`;
   }
 
+  // Product lines saved in Admin may still be in Telugu; show the English starter line instead.
+  const TELUGU = /[\u0C00-\u0C7F]/;
+  function englishLine(p) {
+    if (p.shortDesc && !TELUGU.test(p.shortDesc)) return p.shortDesc;
+    const d = (window.SML.DEFAULT_PRODUCTS || []).find((x) => x.id === p.id);
+    return d && d.shortDesc && !TELUGU.test(d.shortDesc) ? d.shortDesc : "";
+  }
+
   function cardHtml(p, i) {
     const v = currentVariant(p);
     const soon = p.status === "coming_soon";
     const avail = !soon && variantAvailable(v);
-    const badges = [...(p.badges || []).map((b) => `<span class="badge">${esc(b)}</span>`)];
+    const BADGE_EN = { "గోదావరి స్పెషల్": "Godavari special", "తాజా": "Fresh", "కోనసీమ స్పెషల్": "Konaseema special" };
+    const badges = (p.badges || []).map((b) => BADGE_EN[b] || b).filter((b) => !TELUGU.test(b)).map((b) => `<span class="badge">${esc(b)}</span>`);
     if (soon) badges.unshift(`<span class="badge soon">Coming soon</span>`);
     if (p.localOnly) badges.push(`<span class="badge local">Local delivery</span>`);
     return `<article class="card" style="animation-delay:${Math.min(i, 8) * 40}ms" data-pid="${esc(p.id)}">
@@ -189,7 +198,7 @@
         <span class="card-cat">${esc((categoryOf(p.category) || {}).name || "")}</span>
         <h3><button data-open="${esc(p.id)}">${esc(p.nameEn)}</button></h3>
         ${p.nameTe ? `<span class="card-te">${esc(p.nameTe)}</span>` : ""}
-        <p class="card-desc">${esc(p.shortDesc)}</p>
+        <p class="card-desc">${esc(englishLine(p))}</p>
         ${(p.variants || []).length > 1 ? `<div class="sizes" role="group" aria-label="Size">${p.variants.map((x) => `<button class="size" data-size="${esc(x.id)}" data-pid="${esc(p.id)}" aria-pressed="${x.id === (v && v.id)}" ${!variantAvailable(x) || soon ? "disabled" : ""}>${esc(x.label)}</button>`).join("")}</div>` : `<p class="min-qty">${v && perKg(v.label) ? "Min. 1 kg" : esc(v ? v.label : "")}</p>`}
         <div class="card-foot">
           <span class="price" data-price>${priceHtml(v)}</span>
@@ -242,7 +251,7 @@
           <div class="qty" aria-label="Quantity"><button data-pmq="-1" aria-label="Decrease">−</button><span id="pmQty">1${v && perKg(v.label) ? " kg" : ""}</span><button data-pmq="1" aria-label="Increase">+</button></div>
           <button class="btn btn-primary btn-lg" id="pmAdd" style="flex:1" ${!soon && variantAvailable(v) ? "" : "disabled"}>${soon ? "Coming soon" : variantAvailable(v) ? "Add to cart" : "Sold out"}</button>
         </div>
-        <p class="desc">${esc(p.description || p.shortDesc)}</p>
+        <p class="desc">${esc(p.description || englishLine(p))}</p>
         ${facts.length ? `<div class="facts">${facts.map(([k, val]) => `<details><summary>${k}</summary><p>${esc(val)}</p></details>`).join("")}</div>` : ""}
       </div>`;
     $("#pmBody").dataset.pid = p.id;
