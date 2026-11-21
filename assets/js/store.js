@@ -70,7 +70,6 @@
     const s = S.settings;
     $("#announce").textContent = s.announcement || "";
     $("#heroTitleEn").textContent = s.heroTitle || "";
-    $("#heroTitleTe").textContent = s.heroTitleTe || "";
     $("#heroText").textContent = s.heroText || "";
     $("#heroText").hidden = !s.heroText;
     $("#dispatchNote").textContent = s.dispatchNote || "";
@@ -125,7 +124,7 @@
       const visual = url ? img(url, c.name, { sizes: "(max-width: 640px) 100vw, 33vw", widths: [400, 700, 1000], ratio: 1.25 }) : first ? productVisual(first, "", { hover: false }) : "";
       return `<button class="cat reveal" style="transition-delay:${i * 90}ms" data-cat="${esc(c.id)}" aria-label="Shop ${esc(c.name)}">
         ${visual}
-        <span class="cat-label"><span><span class="te-sm">${esc(c.te)}</span><h3>${esc(c.name)}</h3><p>${esc(c.blurb || "")}</p></span><span class="go" aria-hidden="true">→</span></span>
+        <span class="cat-label"><span><h3>${esc(c.name)}</h3><p>${esc(c.blurb || "")}</p></span><span class="go" aria-hidden="true">→</span></span>
       </button>`;
     }).join("");
   }
@@ -138,8 +137,8 @@
   }
 
   function renderTabs() {
-    const all = [{ id: "all", name: "All", te: "అన్నీ" }, ...S.categories];
-    $("#tabs").innerHTML = all.map((c) => `<button class="tab" role="tab" data-tab="${esc(c.id)}" aria-selected="${c.id === cat}">${esc(c.name)}<span class="te-sm">${esc(c.te || "")}</span></button>`).join("");
+    const all = [{ id: "all", name: "All" }, ...S.categories];
+    $("#tabs").innerHTML = all.map((c) => `<button class="tab" role="tab" data-tab="${esc(c.id)}" aria-selected="${c.id === cat}">${esc(c.name)}</button>`).join("");
   }
 
   function matches(p) {
@@ -175,10 +174,10 @@
         <span class="quick" aria-hidden="true"><span>Quick view</span></span>
       </button>
       <div class="card-body">
-        <span class="card-te">${esc(p.nameTe)}</span>
         <h3><button data-open="${esc(p.id)}">${esc(p.nameEn)}</button></h3>
+        ${p.nameTe ? `<span class="card-te">${esc(p.nameTe)}</span>` : ""}
         <p class="card-desc">${esc(p.shortDesc)}</p>
-        ${(p.variants || []).length > 1 ? `<div class="sizes" role="group" aria-label="Size">${p.variants.map((x) => `<button class="size" data-size="${esc(x.id)}" data-pid="${esc(p.id)}" aria-pressed="${x.id === (v && v.id)}" ${!variantAvailable(x) || soon ? "disabled" : ""}>${esc(x.label)}</button>`).join("")}</div>` : `<p class="min-qty">${v && perKg(v.label) ? "కనీసం 1 kg · Min. 1 kg" : esc(v ? v.label : "")}</p>`}
+        ${(p.variants || []).length > 1 ? `<div class="sizes" role="group" aria-label="Size">${p.variants.map((x) => `<button class="size" data-size="${esc(x.id)}" data-pid="${esc(p.id)}" aria-pressed="${x.id === (v && v.id)}" ${!variantAvailable(x) || soon ? "disabled" : ""}>${esc(x.label)}</button>`).join("")}</div>` : `<p class="min-qty">${v && perKg(v.label) ? "Min. 1 kg" : esc(v ? v.label : "")}</p>`}
         <div class="card-foot">
           <span class="price" data-price>${priceHtml(v)}</span>
           <button class="btn btn-primary add" data-add="${esc(p.id)}" ${avail ? "" : "disabled"}>${soon ? "Soon" : avail ? "Add" : "Sold out"}</button>
@@ -219,12 +218,12 @@
       </div>
       <div class="pm-info">
         <button class="icon-btn close" data-close aria-label="Close">✕</button>
-        <span class="card-te">${esc(p.nameTe)}</span>
         <h2 id="pmTitle">${esc(p.nameEn)}</h2>
-        ${soon ? `<p class="note">త్వరలో వస్తుంది. Coming soon. Message us on WhatsApp to be told when it is ready.</p>` : ""}
+        ${p.nameTe ? `<span class="card-te">${esc(p.nameTe)}</span>` : ""}
+        ${soon ? `<p class="note">Coming soon. Message us on WhatsApp to be told when it is ready.</p>` : ""}
         ${p.localOnly ? `<p class="note green">Fresh product. Delivered only to nearby pincodes${S.settings.localPincodes ? ` (starting ${esc(prefixes(S.settings.localPincodes).join(", "))})` : ""}.</p>` : ""}
         <div class="price" id="pmPrice">${priceHtml(v)}</div>
-        ${(p.variants || []).length < 2 ? `<p class="min-qty">${v && perKg(v.label) ? "కనీసం 1 kg నుంచి ఎన్ని కేజీలైనా · Min. 1 kg, order any number of kilos" : ""}</p>` : ""}
+        ${(p.variants || []).length < 2 ? `<p class="min-qty">${v && perKg(v.label) ? "Minimum 1 kg. Order any number of kilos." : ""}</p>` : ""}
         <div class="sizes" role="group" aria-label="Size" ${(p.variants || []).length < 2 ? "hidden" : ""}>${(p.variants || []).map((x) => `<button class="size" data-pm-size="${esc(x.id)}" aria-pressed="${x.id === (v && v.id)}" ${!variantAvailable(x) || soon ? "disabled" : ""}>${esc(x.label)}</button>`).join("")}</div>
         <div class="pm-buy">
           <div class="qty" aria-label="Quantity"><button data-pmq="-1" aria-label="Decrease">−</button><span id="pmQty">1${v && perKg(v.label) ? " kg" : ""}</span><button data-pmq="1" aria-label="Increase">+</button></div>
@@ -323,7 +322,7 @@
         <div class="thumb">${l.p ? productVisual(l.p, "", { hover: false, widths: [160, 240], sizes: "72px", ratio: 1 }) : ""}</div>
         <div>
           <h4>${esc(l.p ? l.p.nameEn : "Item no longer available")}</h4>
-          <div class="meta">${l.p ? `<span class="te-inline">${esc(l.p.nameTe)}</span> · ` : ""}${l.v ? esc(unitPrice(l.v.label, l.v.price)) : ""}</div>
+          <div class="meta">${l.v ? esc(unitPrice(l.v.label, l.v.price)) : ""}</div>
           ${l.ok ? `<div class="qty"><button data-q="${i}" data-d="-1" aria-label="Decrease">−</button><span>${l.v && perKg(l.v.label) ? `${l.qty} kg` : l.qty}</span><button data-q="${i}" data-d="1" aria-label="Increase">+</button></div>` : `<div class="warn">Currently unavailable — please remove</div>`}
         </div>
         <div class="right">${l.ok ? inr(l.total) : ""}<br><button class="remove" data-rm="${i}">Remove</button></div>

@@ -36,7 +36,7 @@
     out.innerHTML = `
       <p class="eyebrow">Order ${esc(o.orderNo)}</p>
       <h1 style="font-family:var(--serif);font-size:34px;margin-bottom:8px">Hi ${esc((o.customer && o.customer.name || "").split(" ")[0])}, here's your order</h1>
-      <p><span class="pill ${st.tone}">${esc(st.label)}</span> ${st.te ? `<span class="te-inline muted" style="margin-left:6px">${esc(st.te)}</span>` : ""}</p>
+      <p><span class="pill ${st.tone}">${esc(st.label)}</span></p>
       ${st.step ? `<ol class="timeline">${FLOW.map((k) => `<li class="${STATUS[k].step <= st.step ? "on" : ""}">${esc(STATUS[k].label)}</li>`).join("")}</ol>` : ""}
       ${o.status === "payment_failed" ? `<p class="note red">We could not find your payment for this order. Please contact us on WhatsApp with your payment screenshot.</p>` : ""}
       ${ship.courier || ship.tracking ? `<p class="note green">Shipped via <b>${esc(ship.courier || "courier")}</b>${ship.tracking ? ` · Tracking no. <b>${esc(ship.tracking)}</b>` : ""}${ship.url ? ` · <a href="${esc(ship.url)}" target="_blank" rel="noopener">Track shipment</a>` : ""}</p>` : ""}
