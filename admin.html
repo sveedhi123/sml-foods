@@ -1,246 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard — SML Foods</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Manrope', 'sans-serif'], serif: ['Playfair Display', 'serif'] },
-                    colors: {
-                        ivory: '#FAF7F2', forest: '#14362B', gold: '#C59B27',
-                        'forest-dark': '#0D241C', 'forest-light': '#1C4D3E', 'glass': 'rgba(250, 247, 242, 0.15)'
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap');
-    </style>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin — SML Foods</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Telugu:wght@400;600&family=Noto+Serif+Telugu:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/site.css">
+  <link rel="stylesheet" href="assets/css/admin.css">
 </head>
-<body class="bg-ivory text-forest min-h-screen font-sans antialiased">
-    <!-- Login Modal -->
-    <div id="login-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
-            <h2 class="text-2xl font-serif font-bold text-forest-dark mb-6 text-center">Admin Access</h2>
-            <form id="login-form">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-forest-dark mb-1.5">Email</label>
-                    <input type="email" id="email" required class="w-full px-4 py-2.5 rounded-xl border border-forest-light bg-white focus:ring-2 focus:ring-gold focus:border-transparent">
-                </div>
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-forest-dark mb-1.5">Password</label>
-                    <input type="password" id="password" required class="w-full px-4 py-2.5 rounded-xl border border-forest-light bg-white focus:ring-2 focus:ring-gold focus:border-transparent">
-                </div>
-                <button type="submit" class="w-full py-3.5 rounded-xl bg-gold text-forest-dark font-bold text-base hover:opacity-95 transition-all">Sign In</button>
-            </form>
-        </div>
+<body class="admin">
+  <!-- Login -->
+  <section class="login" id="login" hidden>
+    <form class="login-card" id="loginForm">
+      <img src="assets/img/favicon.svg" width="56" height="56" alt="">
+      <h1>SML Admin</h1>
+      <p class="muted">Sign in to manage products and orders</p>
+      <div class="field"><label for="lEmail">Email</label><input id="lEmail" type="email" autocomplete="username" required></div>
+      <div class="field"><label for="lPass">Password</label><input id="lPass" type="password" autocomplete="current-password" required></div>
+      <p class="err" id="lErr"></p>
+      <button class="btn btn-primary btn-lg btn-block" id="lBtn">Sign in</button>
+      <button type="button" class="link" id="lForgot">Forgot password?</button>
+    </form>
+  </section>
+
+  <!-- Not an admin -->
+  <section class="login" id="denied" hidden>
+    <div class="login-card">
+      <h1>Almost there</h1>
+      <p>You're signed in as <b id="dEmail"></b>, but this account is not an admin yet.</p>
+      <p class="muted" style="font-size:14px">In Firebase Console → Firestore → create collection <code>admins</code> → add a document with this ID:</p>
+      <p><code class="uid" id="dUid"></code></p>
+      <button class="btn btn-ghost btn-block" id="dRetry">I've added it — check again</button>
+      <button class="btn btn-ghost btn-block" data-logout style="margin-top:8px">Sign out</button>
     </div>
+  </section>
 
-    <!-- Admin Layout -->
-    <div class="min-h-screen flex">
-        <!-- Sidebar -->
-        <aside class="hidden xl:block w-64 bg-white border-r border-forest-light h-screen">
-            <div class="p-6 border-b border-forest-light">
-                <h1 class="text-2xl font-serif font-bold text-forest">SML Admin</h1>
-            </div>
-            <nav class="p-4 space-y-2">
-                <a href="#products" class="block px-3.5 py-2.5 rounded-xl text-sm font-medium text-forest-dark hover:bg-gold/10 hover:text-forest transition-all">Product Manager</a>
-                <a href="#orders" class="block px-3.5 py-2.5 rounded-xl text-sm font-medium text-forest-dark hover:bg-gold/10 hover:text-forest transition-all">Live Orders</a>
-                <a href="#analytics" class="block px-3.5 py-2.5 rounded-xl text-sm font-medium text-forest-dark hover:bg-gold/10 hover:text-forest transition-all">Analytics</a>
-            </nav>
-        </aside>
-
-        <!-- Mobile Top Nav -->
-        <header class="xl:hidden flex justify-between items-center p-4 bg-white border-b border-forest-light">
-            <h1 class="text-xl font-serif font-bold text-forest">SML Admin</h1>
-            <button id="mobile-menu" class="p-2 rounded-lg hover:bg-gold/10"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
-        </header>
-
-        <!-- Main Content -->
-        <main class="flex-1 p-6 xl:p-10">
-            <!-- Product Manager Section -->
-            <section id="products-section">
-                <div class="flex justify-between items-center mb-8">
-                    <div>
-                        <h2 class="text-3xl font-serif font-bold text-forest-dark mb-2">Product Manager</h2>
-                        <p class="text-forest-dark/70">Add, edit, or remove products from your menu</p>
-                    </div>
-                    <button id="add-product-btn" class="px-5 py-2.5 rounded-xl bg-gold text-forest-dark font-semibold text-sm hover:opacity-95 transition-all">
-                        + Add Product
-                    </button>
-                </div>
-
-                <!-- Product Grid -->
-                <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Products will be rendered here -->
-                </div>
-            </section>
-        </main>
-    </div>
-
-    <!-- Add/Edit Product Modal -->
-    <div id="product-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-5">
-                <h3 id="modal-title" class="text-xl font-serif font-bold text-forest-dark">Add Product</h3>
-                <button id="close-modal-top" class="p-2 rounded-lg hover:bg-gold/10 text-forest-dark" aria-label="Close modal">&times;</button>
-            </div>
-            <form id="product-form">
-                <input type="hidden" id="product-id">
-                
-                <div class="space-y-4">
-                    <!-- Basic Info -->
-                    <div class="border-b border-forest-light pb-6">
-                        <h4 class="text-sm font-semibold text-forest-dark uppercase tracking-wider mb-4">Basic Information</h4>
-                        <div>
-                            <label class="block text-sm font-medium text-forest-dark mb-1.5">Product Name</label>
-                            <input type="text" id="product-name" required class="w-full px-4 py-2.5 rounded-xl border border-forest-light bg-white focus:ring-2 focus:ring-gold">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-forest-dark mb-1.5">Description</label>
-                            <textarea id="product-desc" rows="3" class="w-full px-4 py-2.5 rounded-xl border border-forest-light bg-white focus:ring-2 focus:ring-gold resize-none"></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-forest-dark mb-1.5">Category</label>
-                            <select id="product-category" class="w-full px-4 py-2.5 rounded-xl border border-forest-light bg-white focus:ring-2 focus:ring-gold">
-                                <option value="ghee">Bilona Ghee</option>
-                                <option value="pickles">Andhra Pickles</option>
-                                <option value="paneer">Malai Paneer</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <!-- Pricing -->
-                    <div class="border-b border-forest-light pb-6">
-                        <h4 class="text-sm font-semibold text-forest-dark uppercase tracking-wider mb-4">Pricing (₹)</h4>
-                        <div class="grid grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-xs text-forest-dark/60 mb-1">250g / 250ml</label>
-                                <input type="number" id="price-250g" min="0" step="1" placeholder="0" class="w-full px-3 py-2 rounded-xl border border-forest-light bg-white focus:ring-1 focus:ring-gold">
-                            </div>
-                            <div>
-                                <label class="block text-xs text-forest-dark/60 mb-1">500g / 500ml</label>
-                                <input type="number" id="price-500g" min="0" step="1" placeholder="0" class="w-full px-3 py-2 rounded-xl border border-forest-light bg-white focus:ring-1 focus:ring-gold">
-                            </div>
-                            <div>
-                                <label class="block text-xs text-forest-dark/60 mb-1">1kg / 1L</label>
-                                <input type="number" id="price-1kg" min="0" step="1" placeholder="0" class="w-full px-3 py-2 rounded-xl border border-forest-light bg-white focus:ring-1 focus:ring-gold">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Variants (Weight Options) -->
-                    <div class="border-b border-forest-light pb-6">
-                        <h4 class="text-sm font-semibold text-forest-dark uppercase tracking-wider mb-4">Weight Variants</h4>
-                        <div id="variants-container" class="space-y-2">
-                            <!-- Variants added dynamically -->
-                        </div>
-                        <button type="button" id="add-variant-btn" class="mt-3 px-4 py-2 text-sm font-medium text-gold hover:text-forest transition-colors flex items-center gap-1">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                            Add Weight Variant
-                        </button>
-                    </div>
-                    
-                    <!-- 3D Model & Shelf Position -->
-                    <div class="border-b border-forest-light pb-6">
-                        <h4 class="text-sm font-semibold text-forest-dark uppercase tracking-wider mb-4">3D Virtual Store Settings</h4>
-                        <p class="text-xs text-forest-dark/50 mb-4">Optional: Add a .glb model URL and choose shelf position for the 3D store experience.</p>
-                        <div>
-                            <label class="block text-sm font-medium text-forest-dark mb-1.5">3D Model URL (.glb)</label>
-                            <input type="url" id="product-model-url" placeholder="https://example.com/model.glb or Firebase Storage URL" class="w-full px-4 py-2.5 rounded-xl border border-forest-light bg-white focus:ring-2 focus:ring-gold">
-                            <p class="text-xs text-forest-dark/50 mt-1">Leave blank to use procedural 3D model (auto-generated jar/pack with label)</p>
-                        </div>
-                        <div class="mt-4">
-                            <label class="block text-sm font-medium text-forest-dark mb-1.5">Shelf Position</label>
-                            <select id="product-shelf-position" class="w-full px-4 py-2.5 rounded-xl border border-forest-light bg-white focus:ring-2 focus:ring-gold">
-                                <option value="ghee">Ghee Shelf (Bilona A2 Ghee)</option>
-                                <option value="paneer">Paneer Counter (Fresh Malai Paneer)</option>
-                                <option value="pickles">Pickle Rack (Andhra Pickles)</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <!-- Images -->
-                    <div class="border-b border-forest-light pb-6">
-                        <h4 class="text-sm font-semibold text-forest-dark uppercase tracking-wider mb-4">Product Images</h4>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs text-forest-dark/60 mb-1">Main Image URL</label>
-                                <input type="url" id="product-image" placeholder="https://images.unsplash.com/..." class="w-full px-3 py-2 rounded-xl border border-forest-light bg-white focus:ring-1 focus:ring-gold">
-                            </div>
-                            <div>
-                                <label class="block text-xs text-forest-dark/60 mb-1">Hover Image URL (optional)</label>
-                                <input type="url" id="product-image-hover" placeholder="https://images.unsplash.com/..." class="w-full px-3 py-2 rounded-xl border border-forest-light bg-white focus:ring-1 focus:ring-gold">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Status & Badges -->
-                    <div>
-                        <div class="flex gap-4 mb-4">
-                            <div class="flex-1">
-                                <label class="block text-sm font-medium text-forest-dark mb-1.5">Status</label>
-                                <select id="product-status" class="w-full px-3 py-2.5 rounded-xl border border-forest-light bg-white focus:ring-2 focus:ring-gold">
-                                    <option value="in_stock">In Stock</option>
-                                    <option value="out_of_stock">Out of Stock</option>
-                                    <option value="hidden">Hidden</option>
-                                </select>
-                            </div>
-                            <div class="flex-1">
-                                <label class="block text-sm font-medium text-forest-dark mb-1.5">Badge</label>
-                                <select id="product-badge" class="w-full px-3 py-2.5 rounded-xl border border-forest-light bg-white focus:ring-2 focus:ring-gold">
-                                    <option value="">None</option>
-                                    <option value="Bestseller">Bestseller</option>
-                                    <option value="100% Pure">100% Pure</option>
-                                    <option value="Premium">Premium</option>
-                                    <option value="New">New</option>
-                                    <option value="Traditional">Traditional</option>
-                                    <option value="Fresh Daily">Fresh Daily</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="flex gap-4">
-                            <div class="flex-1">
-                                <label class="block text-sm font-medium text-forest-dark mb-1.5">Churn/Made Date (YYYY-MM-DD)</label>
-                                <input type="date" id="product-date" class="w-full px-4 py-2.5 rounded-xl border border-forest-light bg-white focus:ring-2 focus:ring-gold">
-                            </div>
-                            <div class="flex-1">
-                                <label class="block text-sm font-medium text-forest-dark mb-1.5">Tags (comma-separated)</label>
-                                <input type="text" id="product-tags" placeholder="A2, Bilona, Gir Cow, No Preservatives" class="w-full px-4 py-2.5 rounded-xl border border-forest-light bg-white focus:ring-2 focus:ring-gold">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-forest-light">
-                    <button type="button" id="cancel-product" class="px-5 py-2.5 rounded-xl border border-forest-dark/30 text-forest-dark hover:bg-forest-light transition-all">Cancel</button>
-                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-gold text-forest-dark font-semibold hover:opacity-95 transition-all">Save Product</button>
-                </div>
-            </form>
+  <!-- App -->
+  <div class="app" id="app" hidden>
+    <aside class="side">
+      <a class="side-logo" href="index.html" target="_blank" rel="noopener" title="Open shop">
+        <img src="assets/img/favicon.svg" width="34" height="34" alt=""><span><b>SML</b> Admin</span>
+      </a>
+      <nav class="side-nav" id="sideNav">
+        <button data-view="overview">Overview</button>
+        <button data-view="orders">Orders <span class="count" id="navPending" hidden></span></button>
+        <button data-view="products">Products</button>
+        <button data-view="categories">Categories</button>
+        <button data-view="reviews">Reviews</button>
+        <button data-view="settings">Settings</button>
+      </nav>
+      <div class="side-foot">
+        <span class="muted" id="who"></span>
+        <button class="btn btn-ghost" data-logout>Sign out</button>
+      </div>
+    </aside>
+    <main class="main">
+      <div class="topbar">
+        <h1 id="viewTitle">Overview</h1>
+        <div class="top-actions">
+          <span class="store-state" id="storeState"></span>
+          <a class="btn btn-ghost" href="index.html" target="_blank" rel="noopener">View shop ↗</a>
         </div>
-    </div>
+      </div>
+      <div id="view"></div>
+    </main>
+  </div>
 
-    <!-- Live Orders Section -->
-    <section id="orders-section" class="hidden">
-        <div class="mb-8">
-            <h2 class="text-3xl font-serif font-bold text-forest-dark mb-2">Live Orders</h2>
-            <p class="text-forest-dark/70">Real-time order tracking and management</p>
-        </div>
-        <div id="orders-table">
-            <!-- Orders rendered here -->
-        </div>
-    </section>
+  <div class="modal" id="aModal" role="dialog" aria-modal="true" hidden>
+    <div class="modal-backdrop" data-mclose></div>
+    <div class="modal-card admin-modal" id="aModalBody"></div>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-    <script src="admin.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js" defer></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/catalog.js"></script>
+  <script src="assets/js/common.js"></script>
+  <script src="assets/js/admin.js"></script>
 </body>
 </html>

@@ -1,0 +1,77 @@
+rules_version = '2';
+
+// SML Foods — Firestore security rules
+// Paste into Firebase Console → Firestore Database → Rules → Publish
+// (or deploy with: firebase deploy --only firestore:rules)
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // An admin is a signed-in user whose UID has a document in /admins
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function storeOpen() {
+      return get(/databases/$(database)/documents/settings/store).data.get('storeOpen', false) == true;
+    }
+
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false; // add admins only from the Firebase Console
+    }
+
+    // Public catalogue — anyone can read, only admins can change
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /reviews/{reviewId} {
+      allow read: if resource.data.visible == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Orders — customers can create (with checks) and open their own order by its secret link
+    match /orders/{orderId} {
+      allow get: if true;               // order IDs are long random strings, only shared with the customer
+      allow list, update, delete: if isAdmin();
+      allow create: if isAdmin() || validNewOrder(orderId);
+    }
+
+    // One document per UPI transaction ID, so the same UTR can't be reused for two orders
+    match /payments/{utr} {
+      allow read, update, delete: if isAdmin();
+      allow create: if utr.matches('^[0-9]{12}$')
+        && request.resource.data.keys().hasOnly(['orderId', 'createdAt'])
+        && request.resource.data.createdAt == request.time
+        && getAfter(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.payment.utr == utr;
+    }
+
+    function validNewOrder(orderId) {
+      let d = request.resource.data;
+      return storeOpen()
+        && d.keys().hasOnly(['orderNo', 'customer', 'address', 'notes', 'items', 'subtotal', 'deliveryFee', 'total', 'payment', 'status', 'source', 'createdAt', 'updatedAt'])
+        && d.status == 'payment_submitted'
+        && d.createdAt == request.time
+        && d.updatedAt == request.time
+        && d.orderNo is string && d.orderNo.matches('^SML-[0-9]{6}-[A-Z0-9]{4}$')
+        && d.items is list && d.items.size() > 0 && d.items.size() <= 40
+        && d.subtotal is number && d.deliveryFee is number && d.total is number
+        && d.subtotal > 0 && d.deliveryFee >= 0 && d.total < 500000
+        && d.total == d.subtotal + d.deliveryFee
+        && d.customer.name is string && d.customer.name.size() >= 2 && d.customer.name.size() <= 80
+        && d.customer.phone is string && d.customer.phone.matches('^[6-9][0-9]{9}$')
+        && d.address.line is string && d.address.line.size() <= 300
+        && d.address.pincode is string && d.address.pincode.matches('^[1-9][0-9]{5}$')
+        && d.notes is string && d.notes.size() <= 200
+        && d.payment.method == 'upi'
+        && d.payment.utr is string && d.payment.utr.matches('^[0-9]{12}$')
+        && existsAfter(/databases/$(database)/documents/payments/$(d.payment.utr))
+        && getAfter(/databases/$(database)/documents/payments/$(d.payment.utr)).data.orderId == orderId;
+    }
+  }
+}
