@@ -1,6 +1,6 @@
 /* SML Foods — order tracking page (order.html?id=<orderId>) */
 (async function () {
-  const { esc, inr, STATUS, FLOW, db, waLink, loadStore, withTimeout } = window.SML;
+  const { esc, inr, qtyText, STATUS, FLOW, db, waLink, loadStore, withTimeout } = window.SML;
   const out = document.getElementById("out");
   const id = new URLSearchParams(location.search).get("id");
   const store = await loadStore();
@@ -42,7 +42,7 @@
       ${ship.courier || ship.tracking ? `<p class="note green">Shipped via <b>${esc(ship.courier || "courier")}</b>${ship.tracking ? ` · Tracking no. <b>${esc(ship.tracking)}</b>` : ""}${ship.url ? ` · <a href="${esc(ship.url)}" target="_blank" rel="noopener">Track shipment</a>` : ""}</p>` : ""}
       <div class="co-summary">
         <h3>Items</h3>
-        ${(o.items || []).map((it) => `<div class="row"><span>${esc(it.name)} · ${esc(it.variant)} × ${it.qty}</span><span>${inr(it.lineTotal)}</span></div>`).join("")}
+        ${(o.items || []).map((it) => `<div class="row"><span>${esc(it.name)} · ${esc(qtyText(it.variant, it.qty))}</span><span>${inr(it.lineTotal)}</span></div>`).join("")}
         <div class="row"><span>Delivery</span><span>${o.deliveryFee ? inr(o.deliveryFee) : "Free"}</span></div>
         <div class="row" style="font-weight:700;color:var(--ink)"><span>Total</span><span>${inr(o.total)}</span></div>
       </div>

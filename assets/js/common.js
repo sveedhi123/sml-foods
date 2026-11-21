@@ -93,6 +93,11 @@
     return img(ims[0], p.nameEn, { ...o, cls }) + (opts.hover !== false && ims[1] ? img(ims[1], "", { ...o, cls: "alt" }) : "");
   };
 
+  /* Products are sold per kg: a "1 kg" size with quantity = number of kilos */
+  const perKg = (label) => /^1\s*kg$/i.test(String(label || "").trim());
+  const qtyText = (label, qty) => (perKg(label) ? `${qty} kg` : `${label} × ${qty}`);
+  const unitPrice = (label, price) => (perKg(label) ? `${inr(price)}/kg` : `${inr(price)} · ${label}`);
+
   const prefixes = (s) => String(s || "").split(/[\s,]+/).map((x) => x.trim()).filter(Boolean);
   const pinMatches = (pin, list) => !list.length || list.some((pre) => String(pin).startsWith(pre));
 
@@ -195,7 +200,7 @@
   }
 
   window.SML = {
-    esc, inr, STATUS, FLOW, productArt, productVisual, img, imgUrl, prefixes, pinMatches, lowestPrice, variantAvailable,
+    esc, inr, perKg, qtyText, unitPrice, STATUS, FLOW, productArt, productVisual, img, imgUrl, prefixes, pinMatches, lowestPrice, variantAvailable,
     deliveryFor, upiLink, waLink, digits, genOrderNo, db, loadStore, readCache, withTimeout, shade,
     DEFAULT_SETTINGS, DEFAULT_CATEGORIES, DEFAULT_PRODUCTS
   };

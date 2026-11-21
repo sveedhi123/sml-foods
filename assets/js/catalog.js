@@ -6,10 +6,10 @@
 (function () {
   const DEFAULT_SETTINGS = {
     storeOpen: false,                 // online checkout is off until you switch it on in Admin → Settings
-    announcement: "కోనసీమ నుండి నేరుగా మీ ఇంటికి · ₹999 పైన ఉచిత డెలివరీ",
+    announcement: "",
     heroTitle: "Konaseema pickles, ghee & paneer",
     heroTitleTe: "కోనసీమ పచ్చళ్ళు",
-    heroText: "ఆవకాయ, గోంగూర, మాగాయ, దబ్బకాయ... మా ఇంట్లో పెట్టినట్టే. Pickles, buffalo ghee and fresh paneer, made in our own kitchen in Konaseema.",
+    heroText: "",
     heroImage: "https://images.unsplash.com/photo-1664791461482-79f5deee490f",
     storyImage: "https://images.unsplash.com/photo-1694011772133-dc4b3ff3f24f",
     promiseImage: "https://images.unsplash.com/photo-1716816211590-c15a328a5ff0",
@@ -39,7 +39,7 @@
     { id: "paneer", name: "Paneer", te: "పన్నీర్", blurb: "Fresh paneer", sort: 3, image: "https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8" }
   ];
 
-  // Starter products. Edit them in Admin → Products (prices are samples).
+  // Starter products, sold per kg (minimum 1 kg). Edit them in Admin → Products (prices are samples).
   const DEFAULT_PRODUCTS = [
     {
       "id": "buffalo-ghee",
@@ -60,22 +60,6 @@
         "https://images.unsplash.com/photo-1573812461383-e5f8b759d12e"
       ],
       "variants": [
-        {
-          "id": "250g",
-          "label": "250 g",
-          "price": 220,
-          "mrp": null,
-          "stock": null,
-          "inStock": true
-        },
-        {
-          "id": "500g",
-          "label": "500 g",
-          "price": 430,
-          "mrp": null,
-          "stock": null,
-          "inStock": true
-        },
         {
           "id": "1kg",
           "label": "1 kg",
@@ -107,22 +91,6 @@
         "https://images.unsplash.com/photo-1736752346246-61f4daedfde0"
       ],
       "variants": [
-        {
-          "id": "250g",
-          "label": "250 g",
-          "price": 280,
-          "mrp": null,
-          "stock": null,
-          "inStock": true
-        },
-        {
-          "id": "500g",
-          "label": "500 g",
-          "price": 550,
-          "mrp": null,
-          "stock": null,
-          "inStock": true
-        },
         {
           "id": "1kg",
           "label": "1 kg",
@@ -157,22 +125,6 @@
       ],
       "variants": [
         {
-          "id": "250g",
-          "label": "250 g",
-          "price": 160,
-          "mrp": null,
-          "stock": null,
-          "inStock": true
-        },
-        {
-          "id": "500g",
-          "label": "500 g",
-          "price": 300,
-          "mrp": null,
-          "stock": null,
-          "inStock": true
-        },
-        {
           "id": "1kg",
           "label": "1 kg",
           "price": 580,
@@ -203,22 +155,6 @@
         "https://images.unsplash.com/photo-1622629111578-d2312c53cde9"
       ],
       "variants": [
-        {
-          "id": "250g",
-          "label": "250 g",
-          "price": 160,
-          "mrp": null,
-          "stock": null,
-          "inStock": true
-        },
-        {
-          "id": "500g",
-          "label": "500 g",
-          "price": 300,
-          "mrp": null,
-          "stock": null,
-          "inStock": true
-        },
         {
           "id": "1kg",
           "label": "1 kg",
@@ -251,22 +187,6 @@
       ],
       "variants": [
         {
-          "id": "250g",
-          "label": "250 g",
-          "price": 160,
-          "mrp": null,
-          "stock": null,
-          "inStock": true
-        },
-        {
-          "id": "500g",
-          "label": "500 g",
-          "price": 300,
-          "mrp": null,
-          "stock": null,
-          "inStock": true
-        },
-        {
           "id": "1kg",
           "label": "1 kg",
           "price": 580,
@@ -297,22 +217,6 @@
         "https://images.unsplash.com/photo-1785605121301-c5ab1cd740d7"
       ],
       "variants": [
-        {
-          "id": "250g",
-          "label": "250 g",
-          "price": 160,
-          "mrp": null,
-          "stock": null,
-          "inStock": true
-        },
-        {
-          "id": "500g",
-          "label": "500 g",
-          "price": 300,
-          "mrp": null,
-          "stock": null,
-          "inStock": true
-        },
         {
           "id": "1kg",
           "label": "1 kg",
@@ -347,22 +251,6 @@
       ],
       "variants": [
         {
-          "id": "250g",
-          "label": "250 g",
-          "price": 160,
-          "mrp": null,
-          "stock": null,
-          "inStock": true
-        },
-        {
-          "id": "500g",
-          "label": "500 g",
-          "price": 300,
-          "mrp": null,
-          "stock": null,
-          "inStock": true
-        },
-        {
           "id": "1kg",
           "label": "1 kg",
           "price": 580,
@@ -393,22 +281,6 @@
         "https://images.unsplash.com/photo-1524593410820-38510f580a77"
       ],
       "variants": [
-        {
-          "id": "250g",
-          "label": "250 g",
-          "price": 160,
-          "mrp": null,
-          "stock": null,
-          "inStock": true
-        },
-        {
-          "id": "500g",
-          "label": "500 g",
-          "price": 300,
-          "mrp": null,
-          "stock": null,
-          "inStock": true
-        },
         {
           "id": "1kg",
           "label": "1 kg",
@@ -443,22 +315,6 @@
       ],
       "variants": [
         {
-          "id": "250g",
-          "label": "250 g",
-          "price": 160,
-          "mrp": null,
-          "stock": null,
-          "inStock": true
-        },
-        {
-          "id": "500g",
-          "label": "500 g",
-          "price": 300,
-          "mrp": null,
-          "stock": null,
-          "inStock": true
-        },
-        {
           "id": "1kg",
           "label": "1 kg",
           "price": 580,
@@ -490,22 +346,6 @@
       ],
       "variants": [
         {
-          "id": "250g",
-          "label": "250 g",
-          "price": 160,
-          "mrp": null,
-          "stock": null,
-          "inStock": true
-        },
-        {
-          "id": "500g",
-          "label": "500 g",
-          "price": 300,
-          "mrp": null,
-          "stock": null,
-          "inStock": true
-        },
-        {
           "id": "1kg",
           "label": "1 kg",
           "price": 580,
@@ -536,22 +376,6 @@
         "https://images.unsplash.com/photo-1617854307432-13950e24ba07"
       ],
       "variants": [
-        {
-          "id": "250g",
-          "label": "250 g",
-          "price": 160,
-          "mrp": null,
-          "stock": null,
-          "inStock": true
-        },
-        {
-          "id": "500g",
-          "label": "500 g",
-          "price": 300,
-          "mrp": null,
-          "stock": null,
-          "inStock": true
-        },
         {
           "id": "1kg",
           "label": "1 kg",
@@ -585,22 +409,6 @@
         "https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8"
       ],
       "variants": [
-        {
-          "id": "200g",
-          "label": "200 g",
-          "price": 100,
-          "mrp": null,
-          "stock": null,
-          "inStock": true
-        },
-        {
-          "id": "500g",
-          "label": "500 g",
-          "price": 240,
-          "mrp": null,
-          "stock": null,
-          "inStock": true
-        },
         {
           "id": "1kg",
           "label": "1 kg",

@@ -141,7 +141,7 @@ p { margin: 0 0 1em; }
 
 /* About */
 .about { background: var(--surface); border-block: 1px solid var(--line); }
-.about-in { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+.about-in { max-width: 760px; }
 .about h2 { margin-bottom: 16px; }
 .te-p { font-size: 19px; color: var(--ink); line-height: 1.8; }
 .about p { color: var(--ink-2); }
@@ -390,3 +390,6 @@ p { margin: 0 0 1em; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+.unit { font-size: 14px; font-weight: 600; color: var(--muted); margin-left: 2px; }
+.min-qty { font-size: 13.5px; color: var(--muted); margin: 0 0 12px; }

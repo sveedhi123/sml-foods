@@ -1,6 +1,6 @@
 /* SML Foods — Admin dashboard: orders, products, categories, reviews, settings */
 (function () {
-  const { esc, inr, STATUS, productVisual, productArt, variantAvailable, upiLink, waLink, digits, db, DEFAULT_SETTINGS, DEFAULT_CATEGORIES, DEFAULT_PRODUCTS } = window.SML;
+  const { esc, inr, qtyText, unitPrice, STATUS, productVisual, productArt, variantAvailable, upiLink, waLink, digits, db, DEFAULT_SETTINGS, DEFAULT_CATEGORIES, DEFAULT_PRODUCTS } = window.SML;
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => Array.from(el.querySelectorAll(s));
 
@@ -220,7 +220,7 @@
   function exportCsv() {
     const rows = [["Order no", "Date", "Status", "Name", "Phone", "Email", "Address", "City", "State", "Pincode", "Items", "Subtotal", "Delivery", "Total", "UTR", "Courier", "Tracking"]];
     filteredOrders().forEach((o) => rows.push([o.orderNo, (tsDate(o.createdAt) || new Date()).toISOString(), o.status, o.customer.name, o.customer.phone, o.customer.email, o.address.line, o.address.city, o.address.state, o.address.pincode,
-      (o.items || []).map((i) => `${i.name} ${i.variant} x${i.qty}`).join("; "), o.subtotal, o.deliveryFee, o.total, o.payment && o.payment.utr, o.shipping && o.shipping.courier, o.shipping && o.shipping.tracking]));
+      (o.items || []).map((i) => `${i.name} ${qtyText(i.variant, i.qty)}`).join("; "), o.subtotal, o.deliveryFee, o.total, o.payment && o.payment.utr, o.shipping && o.shipping.courier, o.shipping && o.shipping.tracking]));
     const csv = rows.map((r) => r.map((c) => `"${String(c === undefined || c === null ? "" : c).replace(/"/g, '""')}"`).join(",")).join("\n");
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob(["﻿" + csv], { type: "text/csv" }));
@@ -290,7 +290,7 @@
         </div>
         <p class="section-label">Items</p>
         <table class="table"><tbody>
-          ${(o.items || []).map((it) => `<tr><td>${esc(it.name)} <span class="te-inline muted">${esc(it.nameTe || "")}</span><div class="muted" style="font-size:12.5px">${esc(it.variant)} · ${inr(it.price)}</div></td><td class="num">× ${it.qty}</td><td class="num">${inr(it.lineTotal)}</td></tr>`).join("")}
+          ${(o.items || []).map((it) => `<tr><td>${esc(it.name)} <span class="te-inline muted">${esc(it.nameTe || "")}</span><div class="muted" style="font-size:12.5px">${esc(unitPrice(it.variant, it.price))}</div></td><td class="num">${esc(qtyText(it.variant, it.qty))}</td><td class="num">${inr(it.lineTotal)}</td></tr>`).join("")}
           <tr><td>Delivery</td><td></td><td class="num">${o.deliveryFee ? inr(o.deliveryFee) : "Free"}</td></tr>
           <tr><td><b>Total</b></td><td></td><td class="num"><b>${inr(o.total)}</b></td></tr>
         </tbody></table>
@@ -377,7 +377,7 @@
       <p style="margin:0 0 12px;color:#555">Seetha Maha Lakshmi Foods · ${esc(s.address || "")}${s.fssai ? ` · FSSAI ${esc(s.fssai)}` : ""}</p>
       <p><b>Order ${esc(o.orderNo)}</b> · ${esc(fmtDate(o.createdAt))}</p>
       <p><b>Ship to:</b><br>${esc(o.customer.name)}<br>${esc(o.address.line)}<br>${esc(o.address.city)}, ${esc(o.address.state)} - ${esc(o.address.pincode)}<br>📞 ${esc(o.customer.phone)}</p>
-      <table style="width:100%;border-collapse:collapse;font-size:14px">${(o.items || []).map((i) => `<tr><td style="border-bottom:1px solid #ddd;padding:6px 0">${esc(i.name)} (${esc(i.variant)})</td><td style="border-bottom:1px solid #ddd;text-align:right">× ${i.qty}</td><td style="border-bottom:1px solid #ddd;text-align:right">${inr(i.lineTotal)}</td></tr>`).join("")}
+      <table style="width:100%;border-collapse:collapse;font-size:14px">${(o.items || []).map((i) => `<tr><td style="border-bottom:1px solid #ddd;padding:6px 0">${esc(i.name)}</td><td style="border-bottom:1px solid #ddd;text-align:right">${esc(qtyText(i.variant, i.qty))}</td><td style="border-bottom:1px solid #ddd;text-align:right">${inr(i.lineTotal)}</td></tr>`).join("")}
       <tr><td style="padding:6px 0">Delivery</td><td></td><td style="text-align:right">${o.deliveryFee ? inr(o.deliveryFee) : "Free"}</td></tr>
       <tr><td><b>Total (paid by UPI ${esc(o.payment.utr)})</b></td><td></td><td style="text-align:right"><b>${inr(o.total)}</b></td></tr></table>
       ${o.notes ? `<p><b>Note:</b> ${esc(o.notes)}</p>` : ""}
@@ -419,7 +419,7 @@
     draft = src ? JSON.parse(JSON.stringify(src)) : {
       nameEn: "", nameTe: "", category: A.productFilter !== "all" ? A.productFilter : (A.categories[0] || {}).id || "pickles", color: "#B5341F",
       shortDesc: "", description: "", ingredients: "", shelfLife: "", storage: "", badges: [], images: [],
-      variants: [{ id: "250g", label: "250 g", price: 0, mrp: null, stock: null, inStock: true }],
+      variants: [{ id: "1kg", label: "1 kg", price: 0, mrp: null, stock: null, inStock: true }],
       status: "active", localOnly: false, featured: false, sort: (A.products.reduce((m, p) => Math.max(m, p.sort || 0), 0) || 0) + 1
     };
     if (dupFrom) { delete draft.id; draft.nameEn += " (copy)"; draft.status = "hidden"; }

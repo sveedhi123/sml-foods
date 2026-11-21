@@ -1,6 +1,6 @@
 /* SML Foods — storefront: catalogue, product view, cart, checkout (zero-fee UPI) */
 (function () {
-  const { esc, inr, productVisual, img, prefixes, pinMatches, lowestPrice, variantAvailable, deliveryFor, upiLink, waLink, digits, genOrderNo, db } = window.SML;
+  const { esc, inr, perKg, qtyText, unitPrice, productVisual, img, prefixes, pinMatches, lowestPrice, variantAvailable, deliveryFor, upiLink, waLink, digits, genOrderNo, db } = window.SML;
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => Array.from(el.querySelectorAll(s));
 
@@ -72,6 +72,7 @@
     $("#heroTitleEn").textContent = s.heroTitle || "";
     $("#heroTitleTe").textContent = s.heroTitleTe || "";
     $("#heroText").textContent = s.heroText || "";
+    $("#heroText").hidden = !s.heroText;
     $("#dispatchNote").textContent = s.dispatchNote || "";
     $("#year").textContent = new Date().getFullYear();
     $("#footerAddress").textContent = s.address || "";
@@ -157,7 +158,7 @@
   function priceHtml(v) {
     if (!v) return "";
     const mrp = Number(v.mrp) > Number(v.price) ? `<s>${inr(v.mrp)}</s>` : "";
-    return `${inr(v.price)}${mrp}`;
+    return `${inr(v.price)}${perKg(v.label) ? `<small class="unit">/kg</small>` : ""}${mrp}`;
   }
 
   function cardHtml(p, i) {
@@ -177,7 +178,7 @@
         <span class="card-te">${esc(p.nameTe)}</span>
         <h3><button data-open="${esc(p.id)}">${esc(p.nameEn)}</button></h3>
         <p class="card-desc">${esc(p.shortDesc)}</p>
-        ${(p.variants || []).length > 1 ? `<div class="sizes" role="group" aria-label="Size">${p.variants.map((x) => `<button class="size" data-size="${esc(x.id)}" data-pid="${esc(p.id)}" aria-pressed="${x.id === (v && v.id)}" ${!variantAvailable(x) || soon ? "disabled" : ""}>${esc(x.label)}</button>`).join("")}</div>` : `<div class="sizes"><span class="size" aria-pressed="true">${esc(v ? v.label : "")}</span></div>`}
+        ${(p.variants || []).length > 1 ? `<div class="sizes" role="group" aria-label="Size">${p.variants.map((x) => `<button class="size" data-size="${esc(x.id)}" data-pid="${esc(p.id)}" aria-pressed="${x.id === (v && v.id)}" ${!variantAvailable(x) || soon ? "disabled" : ""}>${esc(x.label)}</button>`).join("")}</div>` : `<p class="min-qty">${v && perKg(v.label) ? "కనీసం 1 kg · Min. 1 kg" : esc(v ? v.label : "")}</p>`}
         <div class="card-foot">
           <span class="price" data-price>${priceHtml(v)}</span>
           <button class="btn btn-primary add" data-add="${esc(p.id)}" ${avail ? "" : "disabled"}>${soon ? "Soon" : avail ? "Add" : "Sold out"}</button>
@@ -223,9 +224,10 @@
         ${soon ? `<p class="note">త్వరలో వస్తుంది. Coming soon. Message us on WhatsApp to be told when it is ready.</p>` : ""}
         ${p.localOnly ? `<p class="note green">Fresh product. Delivered only to nearby pincodes${S.settings.localPincodes ? ` (starting ${esc(prefixes(S.settings.localPincodes).join(", "))})` : ""}.</p>` : ""}
         <div class="price" id="pmPrice">${priceHtml(v)}</div>
-        <div class="sizes" role="group" aria-label="Size">${(p.variants || []).map((x) => `<button class="size" data-pm-size="${esc(x.id)}" aria-pressed="${x.id === (v && v.id)}" ${!variantAvailable(x) || soon ? "disabled" : ""}>${esc(x.label)}</button>`).join("")}</div>
+        ${(p.variants || []).length < 2 ? `<p class="min-qty">${v && perKg(v.label) ? "కనీసం 1 kg నుంచి ఎన్ని కేజీలైనా · Min. 1 kg, order any number of kilos" : ""}</p>` : ""}
+        <div class="sizes" role="group" aria-label="Size" ${(p.variants || []).length < 2 ? "hidden" : ""}>${(p.variants || []).map((x) => `<button class="size" data-pm-size="${esc(x.id)}" aria-pressed="${x.id === (v && v.id)}" ${!variantAvailable(x) || soon ? "disabled" : ""}>${esc(x.label)}</button>`).join("")}</div>
         <div class="pm-buy">
-          <div class="qty" aria-label="Quantity"><button data-pmq="-1" aria-label="Decrease">−</button><span id="pmQty">1</span><button data-pmq="1" aria-label="Increase">+</button></div>
+          <div class="qty" aria-label="Quantity"><button data-pmq="-1" aria-label="Decrease">−</button><span id="pmQty">1${v && perKg(v.label) ? " kg" : ""}</span><button data-pmq="1" aria-label="Increase">+</button></div>
           <button class="btn btn-primary btn-lg" id="pmAdd" style="flex:1" ${!soon && variantAvailable(v) ? "" : "disabled"}>${soon ? "Coming soon" : variantAvailable(v) ? "Add to cart" : "Sold out"}</button>
         </div>
         <p class="desc">${esc(p.description || p.shortDesc)}</p>
@@ -321,8 +323,8 @@
         <div class="thumb">${l.p ? productVisual(l.p, "", { hover: false, widths: [160, 240], sizes: "72px", ratio: 1 }) : ""}</div>
         <div>
           <h4>${esc(l.p ? l.p.nameEn : "Item no longer available")}</h4>
-          <div class="meta">${l.p ? `<span class="te-inline">${esc(l.p.nameTe)}</span> · ` : ""}${esc(l.v ? l.v.label : "")}${l.v ? ` · ${inr(l.v.price)}` : ""}</div>
-          ${l.ok ? `<div class="qty"><button data-q="${i}" data-d="-1" aria-label="Decrease">−</button><span>${l.qty}</span><button data-q="${i}" data-d="1" aria-label="Increase">+</button></div>` : `<div class="warn">Currently unavailable — please remove</div>`}
+          <div class="meta">${l.p ? `<span class="te-inline">${esc(l.p.nameTe)}</span> · ` : ""}${l.v ? esc(unitPrice(l.v.label, l.v.price)) : ""}</div>
+          ${l.ok ? `<div class="qty"><button data-q="${i}" data-d="-1" aria-label="Decrease">−</button><span>${l.v && perKg(l.v.label) ? `${l.qty} kg` : l.qty}</span><button data-q="${i}" data-d="1" aria-label="Increase">+</button></div>` : `<div class="warn">Currently unavailable — please remove</div>`}
         </div>
         <div class="right">${l.ok ? inr(l.total) : ""}<br><button class="remove" data-rm="${i}">Remove</button></div>
       </div>`).join("");
@@ -350,7 +352,7 @@
   }
 
   function cartMessage(ls, t) {
-    return `Namaste SML Foods! I'd like to order:\n\n${ls.filter((l) => l.ok).map((l, i) => `${i + 1}. ${l.p.nameEn} (${l.v.label}) × ${l.qty} = ${inr(l.total)}`).join("\n")}\n\nSubtotal: ${inr(t.subtotal)}\nDelivery: ${t.delivery ? inr(t.delivery) : "Free"}\nTotal: ${inr(t.total)}`;
+    return `Namaste SML Foods! I'd like to order:\n\n${ls.filter((l) => l.ok).map((l, i) => `${i + 1}. ${l.p.nameEn} – ${qtyText(l.v.label, l.qty)} = ${inr(l.total)}`).join("\n")}\n\nSubtotal: ${inr(t.subtotal)}\nDelivery: ${t.delivery ? inr(t.delivery) : "Free"}\nTotal: ${inr(t.total)}`;
   }
 
   /* ---------------- Checkout ---------------- */
@@ -517,7 +519,7 @@
   }
 
   function orderMessage(o) {
-    return `🛒 New order ${o.orderNo}\n\n${o.items.map((it, i) => `${i + 1}. ${it.name} (${it.variant}) × ${it.qty} = ${inr(it.lineTotal)}`).join("\n")}\n\nTotal paid: ${inr(o.total)}\nUPI ref (UTR): ${o.payment.utr}\n\n${o.customer.name}\n${o.customer.phone}\n${o.address.line}, ${o.address.city}, ${o.address.state} - ${o.address.pincode}${o.notes ? `\nNote: ${o.notes}` : ""}`;
+    return `🛒 New order ${o.orderNo}\n\n${o.items.map((it, i) => `${i + 1}. ${it.name} – ${qtyText(it.variant, it.qty)} = ${inr(it.lineTotal)}`).join("\n")}\n\nTotal paid: ${inr(o.total)}\nUPI ref (UTR): ${o.payment.utr}\n\n${o.customer.name}\n${o.customer.phone}\n${o.address.line}, ${o.address.city}, ${o.address.state} - ${o.address.pincode}${o.notes ? `\nNote: ${o.notes}` : ""}`;
   }
 
   function stepDone(order) {
@@ -588,7 +590,7 @@
       }
       if (d.pmq) {
         const q = Math.max(1, Math.min(50, Number($("#pmBody").dataset.qty) + Number(d.pmq)));
-        $("#pmBody").dataset.qty = q; $("#pmQty").textContent = q;
+        $("#pmBody").dataset.qty = q; const pv = currentVariant(product($("#pmBody").dataset.pid)); $("#pmQty").textContent = q + (pv && perKg(pv.label) ? " kg" : "");
         return;
       }
       if (t.id === "pmAdd") {
