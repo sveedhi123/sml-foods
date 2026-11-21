@@ -36,7 +36,7 @@
   const DEFAULT_CATEGORIES = [
     { id: "ghee", name: "Ghee", te: "నెయ్యి", blurb: "Slow-cooked, grainy, aromatic", sort: 1, image: "https://images.unsplash.com/photo-1605880980331-20a711b27338" },
     { id: "pickles", name: "Pickles", te: "పచ్చళ్ళు", blurb: "Traditional Andhra recipes", sort: 2, image: "https://images.unsplash.com/photo-1601702538934-efffab67ab65" },
-    { id: "paneer", name: "Paneer", te: "పన్నీర్", blurb: "Fresh, soft, made by us", sort: 3, image: "https://images.unsplash.com/photo-1630748661719-875c3b7ebfb7" }
+    { id: "paneer", name: "Paneer", te: "పన్నీర్", blurb: "Fresh, soft, made by us", sort: 3, image: "https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8" }
   ];
 
   const pickleSizes = (a, b, c) => [
@@ -81,7 +81,7 @@
     },
     pickle("avakaya", "Avakaya (Mango Pickle)", "ఆవకాయ", "#B5341F",
       "The king of Andhra pickles — raw mango, mustard and red chilli.",
-      "Andhra's most-loved pickle. Firm raw mango pieces, cut with the seed shell, are mixed with freshly ground mustard, red chilli powder and salt, then rested in oil until the flavours mature. Bold, fiery and tangy — mix it with hot rice and a spoon of ghee.", 10, { badges: ["Bestseller"], featured: true, images: ["https://images.unsplash.com/photo-1705860589032-a9c98cb3cfa8", "https://images.unsplash.com/photo-1664791461482-79f5deee490f"] }),
+      "Andhra's most-loved pickle. Firm raw mango pieces, cut with the seed shell, are mixed with freshly ground mustard, red chilli powder and salt, then rested in oil until the flavours mature. Bold, fiery and tangy — mix it with hot rice and a spoon of ghee.", 10, { badges: ["Bestseller"], featured: true, images: ["https://images.unsplash.com/photo-1589135233689-d56032e9680a", "https://images.unsplash.com/photo-1664791461482-79f5deee490f"] }),
     pickle("magaya", "Magaya (Sun-dried Mango Pickle)", "మాగాయ", "#C8641E",
       "Salted, sun-dried mango slices with a tangy spice mix.",
       "Peeled raw mango pieces are salted and sun-dried, then mixed with red chilli, mustard and fenugreek. Tangier and gentler than avakaya, with a chewy bite — a classic with curd rice.", 11, { images: ["https://images.unsplash.com/photo-1601702538934-efffab67ab65", "https://images.unsplash.com/photo-1622629111578-d2312c53cde9"] }),
@@ -111,7 +111,7 @@
       shortDesc: "Soft, fresh paneer made by us. Delivered chilled to nearby pincodes.",
       description: "Fresh paneer made by us from milk — soft and creamy, yet firm enough to hold its shape in curries, tikka and bhurji. Because it is fresh, we deliver paneer only to nearby pincodes and pack it chilled.",
       ingredients: "", shelfLife: "", storage: "Keep refrigerated (below 4°C). Use within the shelf life printed on the pack.",
-      badges: ["Fresh"], images: ["https://images.unsplash.com/photo-1630748661719-875c3b7ebfb7", "https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8"],
+      badges: ["Fresh"], images: ["https://images.unsplash.com/photo-1702650730093-43cfa3237228", "https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8"],
       variants: [
         { id: "200g", label: "200 g", price: 100, mrp: null, stock: null, inStock: true },
         { id: "500g", label: "500 g", price: 240, mrp: null, stock: null, inStock: true },
