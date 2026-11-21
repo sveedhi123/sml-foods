@@ -3,41 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>SML Foods | Konaseema Pickles, Buffalo Ghee & Paneer</title>
-  <meta name="description" content="Konaseema special pickles – avakaya, gongura, magaya, dabbakaya, nimmakaya and more – with buffalo ghee and fresh paneer from SML Foods, Konaseema. Order online.">
-  <meta name="theme-color" content="#7A1F1F">
-  <meta property="og:title" content="SML Foods – Konaseema pickles, ghee & paneer">
-  <meta property="og:description" content="Konaseema pickles, buffalo ghee and fresh paneer. Order online.">
-  <meta property="og:image" content="https://sveedhi123.github.io/sml-foods/assets/img/og-image.png?v=11">
+  <title>SML Foods | Buffalo Ghee, Konaseema Pickles & Paneer</title>
+  <meta name="description" content="Buffalo ghee, Konaseema pickles – avakaya, gongura, magaya, dabbakaya, nimmakaya and more – and fresh paneer from SML Foods, Konaseema. Sold by the kg. Order online.">
+  <meta name="theme-color" content="#0E0E0E">
+  <meta property="og:title" content="SML Foods – Buffalo ghee, Konaseema pickles & paneer">
+  <meta property="og:description" content="Buffalo ghee, Konaseema pickles and fresh paneer. Sold by the kg. Order online.">
+  <meta property="og:image" content="https://sveedhi123.github.io/sml-foods/assets/img/og-image.png?v=12">
   <meta property="og:type" content="website">
-  <link rel="icon" href="assets/img/favicon.svg?v=11" type="image/svg+xml">
-  <link rel="icon" href="assets/img/favicon-32.png?v=11" sizes="32x32" type="image/png">
-  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=11">
+  <link rel="icon" href="assets/img/favicon.svg?v=12" type="image/svg+xml">
+  <link rel="icon" href="assets/img/favicon-32.png?v=12" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=12">
   <link rel="preconnect" href="https://images.unsplash.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Guntur:wght@400;500;600;700&family=Ramabhadra&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/site.css?v=11">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Manrope:wght@400;500;600;700;800&family=Hind+Guntur:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/site.css?v=12">
 </head>
 <body>
   <a class="skip" href="#shop">Skip to products</a>
 
+  <!-- Moving announcement strip -->
+  <div class="ticker" aria-label="Store information">
+    <div class="ticker-track" id="ticker">
+      <span>Made in Konaseema</span><span>Sold by the kg</span><span>Pay by UPI</span><span>Delivery across Andhra Pradesh &amp; Telangana</span><span>Bulk &amp; festival orders on WhatsApp</span>
+    </div>
+  </div>
   <div class="announce" id="announce"></div>
 
   <header class="header" id="header">
     <div class="wrap header-in">
       <a href="#" class="logo" aria-label="SML Foods home">
-        <img src="assets/img/logo.svg?v=11" class="logo-img" width="145" height="60" alt="SML Foods, Konaseema">
+        <img src="assets/img/logo-light.svg?v=12" class="logo-img" width="145" height="60" alt="SML Foods">
       </a>
       <nav class="nav" aria-label="Main">
-        <a href="#shop" data-cat-link="pickles">Pickles</a>
         <a href="#shop" data-cat-link="ghee">Ghee</a>
+        <a href="#shop" data-cat-link="pickles">Pickles</a>
         <a href="#shop" data-cat-link="paneer">Paneer</a>
-        <a href="#about">About</a>
+        <a href="#konaseema">Our story</a>
         <a href="#contact">Contact</a>
       </nav>
       <button class="cart-btn" id="cartBtn" aria-label="Open cart" aria-haspopup="dialog">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14l-1.2 12.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8L5 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14l-1.2 12.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8L5 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
         <span>Cart</span>
         <span class="cart-count" id="cartCount" hidden>0</span>
       </button>
@@ -45,27 +51,86 @@
   </header>
 
   <main>
-    <!-- Hero -->
-    <section class="hero">
-      <div class="wrap hero-in">
-        <div class="hero-copy">
-          <h1 class="hero-title" id="heroTitleEn">Konaseema pickles, ghee &amp; paneer</h1>
-          <p class="lead" id="heroText"></p>
-          <div class="hero-cta">
-            <a href="#shop" class="btn btn-primary btn-lg">Order now</a>
-            <a href="#contact" class="btn btn-ghost btn-lg">WhatsApp</a>
+    <!-- Hero slider (images come from the category photos in Admin) -->
+    <section class="hero" id="hero" aria-roledescription="carousel" aria-label="Featured">
+      <div class="slides">
+        <article class="slide is-on" data-slide="0" data-cat-img="ghee" aria-roledescription="slide" aria-label="1 of 3">
+          <div class="slide-media"></div>
+          <div class="wrap slide-copy">
+            <p class="eyebrow">SML · Konaseema</p>
+            <h1 class="slide-title" id="heroTitleEn">Pure <em>buffalo</em> ghee</h1>
+            <p class="slide-text">Slow-cooked from buffalo butter. Grainy, golden and full of aroma.</p>
+            <div class="slide-cta">
+              <a href="#shop" class="btn btn-gold btn-lg" data-cat-link="ghee">Shop ghee <span aria-hidden="true">→</span></a>
+              <a href="#contact" class="btn btn-glass btn-lg">WhatsApp</a>
+            </div>
           </div>
-          <p class="hero-note">Prices per kg · Pay by UPI</p>
+        </article>
+        <article class="slide" data-slide="1" data-cat-img="pickles" aria-roledescription="slide" aria-label="2 of 3">
+          <div class="slide-media"></div>
+          <div class="wrap slide-copy">
+            <p class="eyebrow">Andhra pickles</p>
+            <h2 class="slide-title">Konaseema <em>pickles</em></h2>
+            <p class="slide-text">Avakaya, gongura, magaya, dabbakaya and more — nine pickles, all by the kg.</p>
+            <div class="slide-cta">
+              <a href="#shop" class="btn btn-gold btn-lg" data-cat-link="pickles">Shop pickles <span aria-hidden="true">→</span></a>
+              <a href="#contact" class="btn btn-glass btn-lg">WhatsApp</a>
+            </div>
+          </div>
+        </article>
+        <article class="slide" data-slide="2" data-cat-img="paneer" aria-roledescription="slide" aria-label="3 of 3">
+          <div class="slide-media"></div>
+          <div class="wrap slide-copy">
+            <p class="eyebrow">Made fresh</p>
+            <h2 class="slide-title">Fresh <em>paneer</em></h2>
+            <p class="slide-text">Soft, fresh paneer for nearby pincodes.</p>
+            <div class="slide-cta">
+              <a href="#shop" class="btn btn-gold btn-lg" data-cat-link="paneer">Shop paneer <span aria-hidden="true">→</span></a>
+              <a href="#contact" class="btn btn-glass btn-lg">WhatsApp</a>
+            </div>
+          </div>
+        </article>
+      </div>
+      <button class="hero-arrow prev" id="heroPrev" aria-label="Previous slide"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <button class="hero-arrow next" id="heroNext" aria-label="Next slide"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5l7 7-7 7"/></svg></button>
+      <div class="hero-dots" id="heroDots" role="tablist" aria-label="Choose slide">
+        <button role="tab" aria-selected="true" aria-label="Slide 1"><i></i></button>
+        <button role="tab" aria-selected="false" aria-label="Slide 2"><i></i></button>
+        <button role="tab" aria-selected="false" aria-label="Slide 3"><i></i></button>
+      </div>
+      <p class="hero-text" id="heroText" hidden></p>
+    </section>
+
+    <!-- Trust strip -->
+    <section class="trust" aria-label="Why order from us">
+      <div class="wrap trust-in">
+        <div class="trust-item reveal"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3c5 4.5 9 9.4 9 15a9 9 0 0 1-18 0c0-5.6 4-10.5 9-15z"/><path d="M12 19a4 4 0 0 0 4 4"/></svg><div><b>Made in Konaseema</b><span>Our own ghee, pickles &amp; paneer</span></div></div>
+        <div class="trust-item reveal" style="transition-delay:.08s"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 12h20l-2 15H8z"/><path d="M11 12a5 5 0 0 1 10 0"/><path d="M13 20h6"/></svg><div><b>Sold by the kg</b><span>Minimum 1 kg, any quantity</span></div></div>
+        <div class="trust-item reveal" style="transition-delay:.16s"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="8" width="22" height="16" rx="3"/><path d="M5 13h22"/><path d="M10 19h5"/></svg><div><b>Pay by UPI</b><span>PhonePe, Google Pay, Paytm</span></div></div>
+        <div class="trust-item reveal" style="transition-delay:.24s"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3 9h16v13H3z"/><path d="M19 13h5l4 4v5h-9"/><circle cx="8" cy="24" r="2.5"/><circle cx="23" cy="24" r="2.5"/></svg><div><b>Home delivery</b><span>Andhra Pradesh &amp; Telangana</span></div></div>
+      </div>
+    </section>
+
+    <!-- Categories -->
+    <section class="section cats-section" aria-labelledby="catsTitle">
+      <div class="wrap">
+        <div class="head-center reveal">
+          <p class="eyebrow">Shop by category</p>
+          <h2 id="catsTitle">What we make</h2>
+          <span class="flourish" aria-hidden="true"></span>
         </div>
-        <div class="hero-photo" id="heroImg"></div>
+        <div class="cats" id="cats"></div>
       </div>
     </section>
 
     <!-- Shop -->
-    <section class="section" id="shop" aria-labelledby="shopTitle">
+    <section class="section shop" id="shop" aria-labelledby="shopTitle">
       <div class="wrap">
-        <div class="section-head">
-          <h2 id="shopTitle">Our products</h2>
+        <div class="section-head reveal">
+          <div>
+            <p class="eyebrow">Order online</p>
+            <h2 id="shopTitle">Our products</h2>
+          </div>
           <label class="search">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
             <input type="search" id="search" placeholder="Search avakaya, gongura, ghee…" aria-label="Search products">
@@ -77,12 +142,27 @@
       </div>
     </section>
 
-    <!-- About -->
-    <section class="section about" id="about" aria-labelledby="aboutTitle">
-      <div class="wrap about-in">
-        <div>
-          <h2 id="aboutTitle">About us</h2>
-          <p>SML Foods makes buffalo ghee, Andhra pickles and fresh paneer in Konaseema. You can order the same products we sell at our shop here, and we deliver them to your home.</p>
+    <!-- Moving words -->
+    <div class="words" aria-hidden="true">
+      <div class="words-track">
+        <span>Buffalo Ghee</span><span>Avakaya</span><span>Gongura</span><span>Magaya</span><span>Dabbakaya</span><span>Nimmakaya</span><span>Usirikaya</span><span>Allam</span><span>Paneer</span>
+      </div>
+    </div>
+
+    <!-- Konaseema story -->
+    <section class="story" id="konaseema" aria-labelledby="storyTitle">
+      <div class="story-bg" id="storyImg"></div>
+      <div class="wrap story-in">
+        <div class="story-card reveal">
+          <p class="eyebrow">Our story</p>
+          <h2 id="storyTitle">From the heart of <em>Konaseema</em></h2>
+          <p>SML Foods makes buffalo ghee, Andhra pickles and fresh paneer in Konaseema, in the Godavari delta. The same products we sell at our shop, you can now order here and get them at home.</p>
+          <ul class="story-points">
+            <li><b>Buffalo ghee</b><span>Slow-cooked, grainy and aromatic</span></li>
+            <li><b>9 pickles</b><span>Avakaya, gongura, magaya and more</span></li>
+            <li><b>Fresh paneer</b><span>For nearby pincodes</span></li>
+          </ul>
+          <a href="#shop" class="btn btn-gold btn-lg">Shop now <span aria-hidden="true">→</span></a>
         </div>
       </div>
     </section>
@@ -90,12 +170,16 @@
     <!-- How ordering works -->
     <section class="section how" aria-labelledby="howTitle">
       <div class="wrap">
-        <h2 id="howTitle">How to order</h2>
+        <div class="head-center reveal">
+          <p class="eyebrow">Simple &amp; safe</p>
+          <h2 id="howTitle">How to order</h2>
+          <span class="flourish" aria-hidden="true"></span>
+        </div>
         <ol class="steps">
-          <li><b>Add to cart</b><span>Choose your items and how many kilos.</span></li>
-          <li><b>Pay by UPI</b><span>PhonePe, Google Pay, Paytm or any UPI app.</span></li>
-          <li><b>We confirm</b><span>We check the payment and confirm your order.</span></li>
-          <li><b>We ship it</b><span id="dispatchNote">Packed and dispatched in 1–2 working days.</span></li>
+          <li class="reveal"><i>01</i><b>Add to cart</b><span>Choose your items and how many kilos.</span></li>
+          <li class="reveal" style="transition-delay:.1s"><i>02</i><b>Pay by UPI</b><span>PhonePe, Google Pay, Paytm or any UPI app.</span></li>
+          <li class="reveal" style="transition-delay:.2s"><i>03</i><b>We confirm</b><span>We check the payment and confirm your order.</span></li>
+          <li class="reveal" style="transition-delay:.3s"><i>04</i><b>We ship it</b><span id="dispatchNote">Packed and dispatched in 1–2 working days.</span></li>
         </ol>
       </div>
     </section>
@@ -103,16 +187,21 @@
     <!-- Reviews (only shown when real reviews are added in Admin) -->
     <section class="section reviews" id="reviews" hidden aria-labelledby="reviewsTitle">
       <div class="wrap">
-        <h2 id="reviewsTitle">Reviews</h2>
+        <div class="head-center reveal">
+          <p class="eyebrow">Customers</p>
+          <h2 id="reviewsTitle">Reviews</h2>
+          <span class="flourish" aria-hidden="true"></span>
+        </div>
         <div class="review-grid" id="reviewGrid"></div>
       </div>
     </section>
 
     <!-- Contact -->
-    <section class="section contact" id="contact" aria-labelledby="contactTitle">
-      <div class="wrap contact-in">
+    <section class="contact" id="contact" aria-labelledby="contactTitle">
+      <div class="wrap contact-in reveal">
         <div>
-          <h2 id="contactTitle">Contact us</h2>
+          <p class="eyebrow">Bulk &amp; festival orders</p>
+          <h2 id="contactTitle">Talk to us on <em>WhatsApp</em></h2>
           <p>For bulk orders, festival orders or any question, message us on WhatsApp.</p>
           <div class="contact-actions" id="contactActions"></div>
         </div>
@@ -123,24 +212,33 @@
 
   <footer class="footer">
     <div class="wrap footer-in">
-      <div>
-        <img src="assets/img/logo-light.svg?v=11" class="footer-logo" width="126" height="52" alt="SML Foods">
-        <p class="muted" id="footerAddress"></p>
+      <div class="footer-brand">
+        <img src="assets/img/logo-light.svg?v=12" class="footer-logo" width="126" height="52" alt="SML Foods">
+        <p class="footer-about">Buffalo ghee, Andhra pickles and fresh paneer from Konaseema.</p>
+        <p class="footer-address" id="footerAddress"></p>
       </div>
-      <nav aria-label="Policies" class="footer-links">
+      <nav aria-label="Shop" class="footer-col">
+        <h3>Shop</h3>
+        <a href="#shop" data-cat-link="ghee">Ghee</a>
+        <a href="#shop" data-cat-link="pickles">Pickles</a>
+        <a href="#shop" data-cat-link="paneer">Paneer</a>
+        <a href="#shop" data-cat-link="all">All products</a>
+      </nav>
+      <nav aria-label="Help" class="footer-col">
+        <h3>Help</h3>
+        <a href="order.html">Track your order</a>
         <a href="shipping.html">Shipping &amp; delivery</a>
         <a href="refund.html">Returns &amp; refunds</a>
         <a href="privacy.html">Privacy policy</a>
         <a href="terms.html">Terms</a>
-        <a href="order.html">Track your order</a>
       </nav>
-      <div class="footer-legal" id="footerLegal"></div>
+      <div class="footer-col footer-legal" id="footerLegal"></div>
     </div>
-    <div class="wrap copyright">© <span id="year"></span> SML Foods (Seetha Maha Lakshmi Foods)</div>
+    <div class="wrap copyright"><span>© <span id="year"></span> SML Foods (Seetha Maha Lakshmi Foods)</span><span>Made in Konaseema</span></div>
   </footer>
 
   <!-- Mobile cart bar -->
-  <button class="mobile-bar" id="mobileBar" aria-label="Open cart"><span><b id="mbCount">0 items</b><small id="mbTotal"></small></span><span class="btn btn-gold">View cart</span></button>
+  <button class="mobile-bar" id="mobileBar" aria-label="Open cart"><span><b id="mbCount">0 items</b><small id="mbTotal"></small></span><span class="btn btn-gold">View cart →</span></button>
 
   <!-- Product dialog -->
   <div class="modal" id="productModal" role="dialog" aria-modal="true" aria-labelledby="pmTitle" hidden>
@@ -179,9 +277,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js" defer></script>
-  <script src="assets/js/config.js?v=11"></script>
-  <script src="assets/js/catalog.js?v=11"></script>
-  <script src="assets/js/common.js?v=11"></script>
-  <script src="assets/js/store.js?v=11"></script>
+  <script src="assets/js/config.js?v=12"></script>
+  <script src="assets/js/catalog.js?v=12"></script>
+  <script src="assets/js/common.js?v=12"></script>
+  <script src="assets/js/store.js?v=12"></script>
+  <script src="assets/js/ui.js?v=12"></script>
 </body>
 </html>

@@ -69,7 +69,6 @@
   function renderChrome() {
     const s = S.settings;
     $("#announce").textContent = s.announcement || "";
-    $("#heroTitleEn").textContent = s.heroTitle || "";
     $("#heroText").textContent = s.heroText || "";
     $("#heroText").hidden = !s.heroText;
     $("#dispatchNote").textContent = s.dispatchNote || "";
@@ -81,7 +80,12 @@
     if (s.gstin) legal.push(`<span>GSTIN ${esc(s.gstin)}</span>`);
     const social = [["instagram", "Instagram"], ["facebook", "Facebook"], ["youtube", "YouTube"]].filter(([k]) => s[k]);
     if (social.length) legal.push(`<span>${social.map(([k, n]) => `<a href="${esc(s[k])}" target="_blank" rel="noopener">${n}</a>`).join(" · ")}</span>`);
-    $("#footerLegal").innerHTML = legal.join("");
+    const reach = [];
+    if (s.whatsapp) reach.push(`<a href="${waLink(s.whatsapp, "Namaste SML Foods!")}" target="_blank" rel="noopener">WhatsApp +91 ${esc(digits(s.whatsapp).slice(-10))}</a>`);
+    if (s.phone) reach.push(`<a href="tel:${esc(digits(s.phone))}">Call ${esc(s.phone)}</a>`);
+    if (s.email) reach.push(`<a href="mailto:${esc(s.email)}">${esc(s.email)}</a>`);
+    if (!reach.length) reach.push(`<span>Contact details coming soon.</span>`);
+    $("#footerLegal").innerHTML = `<h3>Contact</h3>${reach.join("")}${legal.join("")}`;
 
     const acts = [];
     if (s.whatsapp) acts.push(`<a class="btn btn-wa btn-lg" href="${waLink(s.whatsapp, "Namaste SML Foods! I'd like to know more about your products.")}" target="_blank" rel="noopener">WhatsApp us</a>`);
@@ -96,7 +100,14 @@
     $("#contactList").innerHTML = rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
 
     const D = window.SML.DEFAULT_SETTINGS;
-    setImg("#heroImg", s.heroImage || D.heroImage, "Pickles in clay jars with raw mangoes and chillies", { sizes: "(max-width: 980px) 100vw, 580px", widths: [600, 900, 1200, 1600], ratio: 0.8, eager: true });
+    const defs = window.SML.DEFAULT_CATEGORIES;
+    $$(".slide").forEach((sl, i) => {
+      const id = sl.dataset.catImg;
+      const c = S.categories.find((x) => x.id === id) || defs.find((x) => x.id === id) || {};
+      const url = id === "pickles" ? (s.heroImage || D.heroImage || c.image) : (c.image || (defs.find((x) => x.id === id) || {}).image);
+      const m = $(".slide-media", sl);
+      if (m && url && m.dataset.u !== url) { m.dataset.u = url; m.innerHTML = img(url, "", { sizes: "100vw", widths: [800, 1280, 1920, 2400], eager: i === 0 }); }
+    });
     setImg("#storyImg", s.storyImage || D.storyImage, "Paddy fields and coconut palms in Konaseema", { sizes: "100vw", widths: [800, 1280, 1920, 2400] });
     const pm = $("#promiseMedia");
     if (!pm) return;
@@ -121,10 +132,11 @@
     $("#cats").innerHTML = S.categories.map((c, i) => {
       const first = S.products.find((p) => p.category === c.id && p.status === "active" && (p.images || []).length) || S.products.find((p) => p.category === c.id);
       const url = c.image || (defs.find((x) => x.id === c.id) || {}).image || (first && (first.images || [])[0]);
-      const visual = url ? img(url, c.name, { sizes: "(max-width: 640px) 100vw, 33vw", widths: [400, 700, 1000], ratio: 1.25 }) : first ? productVisual(first, "", { hover: false }) : "";
-      return `<button class="cat reveal" style="transition-delay:${i * 90}ms" data-cat="${esc(c.id)}" aria-label="Shop ${esc(c.name)}">
-        ${visual}
-        <span class="cat-label"><span><h3>${esc(c.name)}</h3><p>${esc(c.blurb || "")}</p></span><span class="go" aria-hidden="true">→</span></span>
+      const visual = url ? img(url, c.name, { sizes: "(max-width: 640px) 100vw, 33vw", widths: [500, 800, 1100], ratio: 1.3 }) : first ? productVisual(first, "", { hover: false }) : "";
+      const n = S.products.filter((p) => p.category === c.id && p.status !== "hidden").length;
+      return `<button class="cat reveal" style="transition-delay:${i * 110}ms" data-cat="${esc(c.id)}" aria-label="Shop ${esc(c.name)}">
+        <span class="cat-media">${visual}</span>
+        <span class="cat-label"><small>${n} ${n === 1 ? "item" : "items"}</small><h3>${esc(c.name)}</h3><span class="cat-go">Shop now <span aria-hidden="true">→</span></span></span>
       </button>`;
     }).join("");
   }
@@ -171,16 +183,17 @@
       <button class="card-media" data-open="${esc(p.id)}" aria-label="View ${esc(p.nameEn)}">
         ${productVisual(p)}
         <span class="badges">${badges.join("")}</span>
-        <span class="quick" aria-hidden="true"><span>Quick view</span></span>
+        <span class="quick" aria-hidden="true">Quick view</span>
       </button>
       <div class="card-body">
+        <span class="card-cat">${esc((categoryOf(p.category) || {}).name || "")}</span>
         <h3><button data-open="${esc(p.id)}">${esc(p.nameEn)}</button></h3>
         ${p.nameTe ? `<span class="card-te">${esc(p.nameTe)}</span>` : ""}
         <p class="card-desc">${esc(p.shortDesc)}</p>
         ${(p.variants || []).length > 1 ? `<div class="sizes" role="group" aria-label="Size">${p.variants.map((x) => `<button class="size" data-size="${esc(x.id)}" data-pid="${esc(p.id)}" aria-pressed="${x.id === (v && v.id)}" ${!variantAvailable(x) || soon ? "disabled" : ""}>${esc(x.label)}</button>`).join("")}</div>` : `<p class="min-qty">${v && perKg(v.label) ? "Min. 1 kg" : esc(v ? v.label : "")}</p>`}
         <div class="card-foot">
           <span class="price" data-price>${priceHtml(v)}</span>
-          <button class="btn btn-primary add" data-add="${esc(p.id)}" ${avail ? "" : "disabled"}>${soon ? "Soon" : avail ? "Add" : "Sold out"}</button>
+          <button class="btn btn-primary add" data-add="${esc(p.id)}" ${avail ? "" : "disabled"}>${soon ? "Soon" : avail ? `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add` : "Sold out"}</button>
         </div>
       </div>
     </article>`;
@@ -574,8 +587,9 @@
         const p = product(d.add);
         const v = currentVariant(p);
         addToCart(p.id, v.id, 1);
+        const was = t.innerHTML;
         t.classList.add("added"); t.textContent = "Added ✓";
-        setTimeout(() => { t.classList.remove("added"); t.textContent = "Add"; }, 1200);
+        setTimeout(() => { t.classList.remove("added"); t.innerHTML = was; }, 1200);
         return;
       }
       if (d.pmSize) {
