@@ -481,7 +481,8 @@ p { margin: 0 0 1em; }
   .timeline li::before { left: 0; top: 3px; margin-left: 0; }
   .timeline li::after { display: none; }
   .mobile-bar { display: flex; position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 45; align-items: center; justify-content: space-between; gap: 12px; background: var(--brand); color: #fff; border-radius: 999px; padding: 8px 8px 8px 20px; box-shadow: var(--shadow-lg); transform: translateY(150%); transition: transform .35s var(--ease); }
-  .mobile-bar.show { transform: none; }
+  .mobile-bar { visibility: hidden; }
+  .mobile-bar.show { transform: none; visibility: visible; }
   .mobile-bar b { font-size: 15px; }
   .mobile-bar small { display: block; font-size: 12px; opacity: .8; }
   .mobile-bar .btn { padding: 11px 18px; }
