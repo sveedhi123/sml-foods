@@ -374,7 +374,7 @@
     el.hidden = false;
     el.innerHTML = `<div style="font-family:Inter,sans-serif;max-width:640px">
       <h2 style="font-family:'Cormorant Garamond',serif;font-size:30px;margin:0">SML Foods</h2>
-      <p style="margin:0 0 12px;color:#555">Seetha Maha Lakshmi Foods · ${esc(s.address || "")}${s.fssai ? ` · FSSAI ${esc(s.fssai)}` : ""}</p>
+      <p style="margin:0 0 12px;color:#555">${esc(s.address || "")}${s.fssai ? ` · FSSAI ${esc(s.fssai)}` : ""}</p>
       <p><b>Order ${esc(o.orderNo)}</b> · ${esc(fmtDate(o.createdAt))}</p>
       <p><b>Ship to:</b><br>${esc(o.customer.name)}<br>${esc(o.address.line)}<br>${esc(o.address.city)}, ${esc(o.address.state)} - ${esc(o.address.pincode)}<br>📞 ${esc(o.customer.phone)}</p>
       <table style="width:100%;border-collapse:collapse;font-size:14px">${(o.items || []).map((i) => `<tr><td style="border-bottom:1px solid #ddd;padding:6px 0">${esc(i.name)}</td><td style="border-bottom:1px solid #ddd;text-align:right">${esc(qtyText(i.variant, i.qty))}</td><td style="border-bottom:1px solid #ddd;text-align:right">${inr(i.lineTotal)}</td></tr>`).join("")}
