@@ -1,6 +1,6 @@
 /* SML Foods — storefront: catalogue, product view, cart, checkout (zero-fee UPI) */
 (function () {
-  const { esc, inr, productVisual, prefixes, pinMatches, lowestPrice, variantAvailable, deliveryFor, upiLink, waLink, digits, genOrderNo, db } = window.SML;
+  const { esc, inr, productVisual, img, prefixes, pinMatches, lowestPrice, variantAvailable, deliveryFor, upiLink, waLink, digits, genOrderNo, db } = window.SML;
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => Array.from(el.querySelectorAll(s));
 
@@ -22,7 +22,8 @@
   async function boot() {
     S = normaliseLocal();
     renderAll();
-    window.addEventListener("scroll", () => $("#header").classList.toggle("scrolled", scrollY > 8), { passive: true });
+    const onScroll = () => { $("#header").classList.toggle("scrolled", scrollY > 80); };
+    window.addEventListener("scroll", onScroll, { passive: true }); onScroll();
     bindEvents();
     routeFromHash();
     S = await window.SML.loadStore();
@@ -45,11 +46,20 @@
   function renderAll() {
     renderChrome();
     renderCats();
+    renderFeatured();
     renderTabs();
     renderGrid();
     renderReviews();
     renderCartCount();
     if (!$("#cartDrawer").hidden) renderCart();
+    observeReveal();
+  }
+
+  let io;
+  function observeReveal() {
+    if (!("IntersectionObserver" in window)) { $$(".reveal").forEach((el) => el.classList.add("in")); return; }
+    io = io || new IntersectionObserver((es) => es.forEach((en) => { if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); } }), { rootMargin: "0px 0px -8% 0px" });
+    $$(".reveal:not(.in)").forEach((el) => io.observe(el));
   }
 
   const product = (id) => S.products.find((p) => p.id === id);
@@ -59,7 +69,7 @@
   function renderChrome() {
     const s = S.settings;
     $("#announce").textContent = s.announcement || "";
-    $("#heroTitle").textContent = s.heroTitle || "";
+    $("#heroTitleEn").textContent = s.heroTitle || "";
     $("#heroTitleTe").textContent = s.heroTitleTe || "";
     $("#heroText").textContent = s.heroText || "";
     $("#dispatchNote").textContent = s.dispatchNote || "";
@@ -85,20 +95,42 @@
     if (s.fssai) rows.push(["FSSAI", esc(s.fssai)]);
     $("#contactList").innerHTML = rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
 
-    const featured = S.products.filter((p) => p.featured && p.status === "active");
-    const pick = (featured.length >= 3 ? featured : S.products).slice(0, 3);
-    $("#heroArt").innerHTML = pick.map((p, i) => `<div class="h-item h${i + 1}i">${productVisual(p)}</div>`).join("");
+    const D = window.SML.DEFAULT_SETTINGS;
+    setImg("#heroImg", s.heroImage || D.heroImage, "Andhra pickles in clay pots with raw mangoes and chillies", { sizes: "100vw", widths: [800, 1280, 1920, 2400], eager: true });
+    setImg("#storyImg", s.storyImage || D.storyImage, "Paddy fields and coconut palms in Konaseema", { sizes: "100vw", widths: [800, 1280, 1920, 2400] });
+    const pm = $("#promiseMedia");
+    const k = [s.promiseImage || D.promiseImage, s.promiseImage2 || D.promiseImage2].join("|");
+    if (pm.dataset.k !== k) {
+      pm.dataset.k = k;
+      pm.innerHTML = img(s.promiseImage || D.promiseImage, "Whole spices used in our pickles", { sizes: "(max-width: 980px) 100vw, 560px", widths: [500, 800, 1100], ratio: 1.25 }) +
+        img(s.promiseImage2 || D.promiseImage2, "Grainy slow-cooked ghee", { cls: "float", sizes: "260px", widths: [300, 500], ratio: 1 });
+    }
+  }
+
+  function setImg(sel, url, alt, opts) {
+    const el = $(sel);
+    if (!el || el.dataset.u === url) return;
+    el.dataset.u = url || "";
+    el.innerHTML = url ? img(url, alt, opts) : "";
   }
 
   function renderCats() {
-    $("#cats").innerHTML = S.categories.map((c) => {
-      const first = S.products.find((p) => p.category === c.id && p.status === "active") || S.products.find((p) => p.category === c.id);
-      return `<button class="cat" data-cat="${esc(c.id)}">
-        <span class="cat-art">${first ? productVisual(first) : ""}</span>
-        <span><span class="te-sm">${esc(c.te)}</span><h3>${esc(c.name)}</h3><p>${esc(c.blurb || "")}</p></span>
-        <span class="arrow" aria-hidden="true">→</span>
+    const defs = window.SML.DEFAULT_CATEGORIES;
+    $("#cats").innerHTML = S.categories.map((c, i) => {
+      const first = S.products.find((p) => p.category === c.id && p.status === "active" && (p.images || []).length) || S.products.find((p) => p.category === c.id);
+      const url = c.image || (defs.find((x) => x.id === c.id) || {}).image || (first && (first.images || [])[0]);
+      const visual = url ? img(url, c.name, { sizes: "(max-width: 640px) 100vw, 33vw", widths: [400, 700, 1000], ratio: 1.25 }) : first ? productVisual(first, "", { hover: false }) : "";
+      return `<button class="cat reveal" style="transition-delay:${i * 90}ms" data-cat="${esc(c.id)}" aria-label="Shop ${esc(c.name)}">
+        ${visual}
+        <span class="cat-label"><span><span class="te-sm">${esc(c.te)}</span><h3>${esc(c.name)}</h3><p>${esc(c.blurb || "")}</p></span><span class="go" aria-hidden="true">→</span></span>
       </button>`;
     }).join("");
+  }
+
+  function renderFeatured() {
+    let list = S.products.filter((p) => p.featured && p.status === "active");
+    if (list.length < 4) list = list.concat(S.products.filter((p) => p.status === "active" && !list.includes(p))).slice(0, 4);
+    $("#featured").innerHTML = list.slice(0, 4).map(cardHtml).join("");
   }
 
   function renderTabs() {
@@ -136,6 +168,7 @@
       <button class="card-media" data-open="${esc(p.id)}" aria-label="View ${esc(p.nameEn)}">
         ${productVisual(p)}
         <span class="badges">${badges.join("")}</span>
+        <span class="quick" aria-hidden="true"><span>Quick view</span></span>
       </button>
       <div class="card-body">
         <span class="card-te">${esc(p.nameTe)}</span>
@@ -177,8 +210,8 @@
     const facts = [["Ingredients", p.ingredients], ["Shelf life", p.shelfLife], ["Storage", p.storage]].filter(([, val]) => val);
     $("#pmBody").innerHTML = `
       <div class="pm-media">
-        ${imgs.length ? `<img class="main" id="pmMain" src="${esc(imgs[0])}" alt="${esc(p.nameEn)}">` : `<div class="art main">${window.SML.productArt(p)}</div>`}
-        ${imgs.length > 1 ? `<div class="pm-thumbs">${imgs.map((src, i) => `<button data-thumb="${esc(src)}" aria-current="${i === 0}" aria-label="Photo ${i + 1}"><img src="${esc(src)}" alt=""></button>`).join("")}</div>` : ""}
+        ${imgs.length ? `<div id="pmMain">${img(imgs[0], p.nameEn, { cls: "main", sizes: "(max-width: 980px) 100vw, 480px", widths: [600, 900, 1200], ratio: 1, eager: true })}</div>` : `<div class="art main">${window.SML.productArt(p)}</div>`}
+        ${imgs.length > 1 ? `<div class="pm-thumbs">${imgs.map((src, i) => `<button data-thumb="${i}" aria-current="${i === 0}" aria-label="Photo ${i + 1}">${img(src, "", { widths: [120, 200], sizes: "64px", ratio: 1 })}</button>`).join("")}</div>` : ""}
       </div>
       <div class="pm-info">
         <button class="icon-btn close" data-close aria-label="Close">✕</button>
@@ -214,6 +247,7 @@
     if (!el.hidden) return;
     el.hidden = false;
     stack.push({ sel, focus: document.activeElement });
+    renderCartCount();
     document.body.style.overflow = "hidden";
     setTimeout(() => { const f = el.querySelector("[autofocus], input, button:not([data-close]), [data-close]"); if (f) f.focus({ preventScroll: true }); }, 50);
   }
@@ -224,6 +258,7 @@
     const i = stack.map((x) => x.sel).lastIndexOf(sel);
     const entry = i >= 0 ? stack.splice(i, 1)[0] : null;
     if (!stack.length) document.body.style.overflow = "";
+    renderCartCount();
     if (sel === "#productModal" && fromUser && location.hash.startsWith("#p/")) history.replaceState(null, "", location.pathname + location.search);
     if (entry && entry.focus && entry.focus.focus) entry.focus.focus({ preventScroll: true });
   }
@@ -263,6 +298,12 @@
     const el = $("#cartCount");
     el.textContent = n;
     el.hidden = n === 0;
+    const bar = $("#mobileBar");
+    if (bar) {
+      $("#mbCount").textContent = `${n} item${n === 1 ? "" : "s"}`;
+      $("#mbTotal").textContent = n ? inr(totals().subtotal) : "";
+      bar.classList.toggle("show", n > 0 && !stack.length);
+    }
   }
 
   function renderCart() {
@@ -274,7 +315,7 @@
     }
     $("#cartItems").innerHTML = ls.map((l, i) => `
       <div class="line">
-        <div class="thumb">${l.p ? productVisual(l.p) : ""}</div>
+        <div class="thumb">${l.p ? productVisual(l.p, "", { hover: false, widths: [160, 240], sizes: "72px", ratio: 1 }) : ""}</div>
         <div>
           <h4>${esc(l.p ? l.p.nameEn : "Item no longer available")}</h4>
           <div class="meta">${l.p ? `<span class="te-inline">${esc(l.p.nameTe)}</span> · ` : ""}${esc(l.v ? l.v.label : "")}${l.v ? ` · ${inr(l.v.price)}` : ""}</div>
@@ -518,10 +559,11 @@
       if (d.size) {
         chosen[d.pid] = d.size;
         const p = product(d.pid);
-        const card = t.closest(".card");
         const v = currentVariant(p);
-        $$(".size", card).forEach((b) => b.setAttribute("aria-pressed", b.dataset.size === v.id));
-        $("[data-price]", card).innerHTML = priceHtml(v);
+        $$(`.card[data-pid="${CSS.escape(p.id)}"]`).forEach((card) => {
+          $$(".size", card).forEach((b) => b.setAttribute("aria-pressed", b.dataset.size === v.id));
+          $("[data-price]", card).innerHTML = priceHtml(v);
+        });
         return;
       }
       if (d.add) {
@@ -538,7 +580,7 @@
         const v = currentVariant(p);
         $$("[data-pm-size]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.pmSize === v.id));
         $("#pmPrice").innerHTML = priceHtml(v);
-        renderGrid();
+        renderGrid(); renderFeatured();
         return;
       }
       if (d.pmq) {
@@ -553,12 +595,13 @@
         openCart();
         return;
       }
-      if (d.thumb) {
-        $("#pmMain").src = d.thumb;
+      if (d.thumb !== undefined) {
+        const p = product($("#pmBody").dataset.pid);
+        $("#pmMain").innerHTML = img(p.images[Number(d.thumb)], p.nameEn, { cls: "main", sizes: "(max-width: 980px) 100vw, 480px", widths: [600, 900, 1200], ratio: 1, eager: true });
         $$("[data-thumb]").forEach((b) => b.setAttribute("aria-current", b === t));
         return;
       }
-      if (t.id === "cartBtn") { openCart(); return; }
+      if (t.id === "cartBtn" || t.id === "mobileBar") { openCart(); return; }
       if (d.q !== undefined) {
         const l = cart[Number(d.q)];
         const v = lines()[Number(d.q)].v;

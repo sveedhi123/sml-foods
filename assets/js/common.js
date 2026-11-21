@@ -72,10 +72,26 @@
     </svg>`;
   }
 
-  const productVisual = (p, cls = "") =>
-    p.images && p.images[0]
-      ? `<img class="${cls}" src="${esc(p.images[0])}" alt="${esc(p.nameEn)}" loading="lazy" decoding="async">`
-      : `<div class="art ${cls}">${productArt(p)}</div>`;
+  /* Images: Unsplash/imgix URLs get automatic resizing + WebP/AVIF via their global CDN */
+  const isCdn = (u) => /^https:\/\/images\.unsplash\.com\//.test(u || "");
+  function imgUrl(u, w, h) {
+    if (!isCdn(u)) return u;
+    const base = u.split("?")[0];
+    return `${base}?auto=format&fit=crop&q=72&w=${w}${h ? `&h=${h}` : ""}`;
+  }
+  function img(u, alt, { cls = "", sizes = "100vw", widths = [400, 700, 1000, 1400], ratio = 0, eager = false } = {}) {
+    if (!u) return "";
+    const h = (w) => (ratio ? Math.round(w * ratio) : 0);
+    const srcset = isCdn(u) ? ` srcset="${widths.map((w) => `${esc(imgUrl(u, w, h(w)))} ${w}w`).join(", ")}" sizes="${sizes}"` : "";
+    return `<img class="${cls}" src="${esc(imgUrl(u, widths[1] || widths[0], h(widths[1] || widths[0])))}"${srcset} alt="${esc(alt)}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
+  }
+  const CARD_SIZES = "(max-width: 640px) 50vw, (max-width: 1100px) 33vw, 300px";
+  const productVisual = (p, cls = "", opts = {}) => {
+    const ims = (p.images || []).filter(Boolean);
+    if (!ims.length) return `<div class="art ${cls}">${productArt(p)}</div>`;
+    const o = { sizes: CARD_SIZES, widths: [360, 560, 800], ratio: 1.25, ...opts };
+    return img(ims[0], p.nameEn, { ...o, cls }) + (opts.hover !== false && ims[1] ? img(ims[1], "", { ...o, cls: "alt" }) : "");
+  };
 
   const prefixes = (s) => String(s || "").split(/[\s,]+/).map((x) => x.trim()).filter(Boolean);
   const pinMatches = (pin, list) => !list.length || list.some((pre) => String(pin).startsWith(pre));
@@ -179,7 +195,7 @@
   }
 
   window.SML = {
-    esc, inr, STATUS, FLOW, productArt, productVisual, prefixes, pinMatches, lowestPrice, variantAvailable,
+    esc, inr, STATUS, FLOW, productArt, productVisual, img, imgUrl, prefixes, pinMatches, lowestPrice, variantAvailable,
     deliveryFor, upiLink, waLink, digits, genOrderNo, db, loadStore, readCache, withTimeout, shade,
     DEFAULT_SETTINGS, DEFAULT_CATEGORIES, DEFAULT_PRODUCTS
   };

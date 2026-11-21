@@ -402,7 +402,7 @@
       </div>
       ${list.length ? `<div class="table-wrap"><table class="table"><thead><tr><th>Product</th><th class="hide-sm">Category</th><th>Price</th><th class="hide-sm">Stock</th><th>Status</th><th></th></tr></thead><tbody>
         ${list.map((p) => `<tr>
-          <td><div class="pcell"><div class="thumb-sm">${productVisual(p)}</div><div><b>${esc(p.nameEn)}</b><div class="te-inline">${esc(p.nameTe)}</div></div></div></td>
+          <td><div class="pcell"><div class="thumb-sm">${productVisual(p, "", { hover: false, widths: [100, 160], sizes: "46px", ratio: 1 })}</div><div><b>${esc(p.nameEn)}</b><div class="te-inline">${esc(p.nameTe)}</div></div></div></td>
           <td class="hide-sm">${esc((A.categories.find((c) => c.id === p.category) || {}).name || p.category)}</td>
           <td>${prices(p)}</td>
           <td class="hide-sm" style="font-size:13px">${stockText(p)}</td>
@@ -464,7 +464,7 @@
 
         <p class="section-label">Photos</p>
         <div class="imgs" id="imgs">
-          ${(p.images || []).map((src, i) => `<div class="img-tile">${i === 0 ? `<span class="first">Main</span>` : ""}<img src="${esc(src)}" alt=""><div class="tools"><button type="button" data-imove="${i}" ${i === 0 ? "disabled" : ""}>◀</button><button type="button" data-idel="${i}">Remove</button></div></div>`).join("")}
+          ${(p.images || []).map((src, i) => `<div class="img-tile">${i === 0 ? `<span class="first">Main</span>` : ""}<img src="${esc(window.SML.imgUrl(src, 240, 240))}" alt=""><div class="tools"><button type="button" data-imove="${i}" ${i === 0 ? "disabled" : ""}>◀</button><button type="button" data-idel="${i}">Remove</button></div></div>`).join("")}
           ${(p.images || []).length < 4 ? `<label class="img-add">+ Upload<br>photo<input type="file" accept="image/*" id="imgFile" hidden multiple></label>` : ""}
           ${!(p.images || []).length ? `<div class="img-tile" title="Shown until you add a photo">${`<div class="art">${productArt(p)}</div>`}</div>` : ""}
         </div>
@@ -547,10 +547,10 @@
   function viewCategories() {
     return `<div class="panel">
       <h2>Categories <small>shown as tabs and cards on the shop</small></h2>
-      <table class="vtable" id="catTable"><thead><tr><th>Name (English)</th><th>Name (Telugu)</th><th>Short line</th><th>Order</th><th>Products</th><th></th></tr></thead><tbody>
+      <table class="vtable" id="catTable"><thead><tr><th>Name (English)</th><th>Name (Telugu)</th><th>Short line</th><th>Photo link</th><th>Order</th><th>Products</th><th></th></tr></thead><tbody>
         ${A.categories.map((c, i) => { const n = A.products.filter((p) => p.category === c.id).length; return `<tr data-ci="${i}" data-id="${esc(c.id)}">
           <td><input data-c="name" value="${esc(c.name)}"></td><td><input data-c="te" value="${esc(c.te || "")}" style="font-family:var(--te)"></td>
-          <td><input data-c="blurb" value="${esc(c.blurb || "")}"></td><td style="width:80px"><input data-c="sort" type="number" value="${esc(c.sort || i + 1)}"></td>
+          <td><input data-c="blurb" value="${esc(c.blurb || "")}"></td><td><input data-c="image" value="${esc(c.image || "")}" placeholder="https://"></td><td style="width:80px"><input data-c="sort" type="number" value="${esc(c.sort || i + 1)}"></td>
           <td style="text-align:center">${n}</td><td><button class="btn btn-ghost btn-sm" data-cdel="${i}" ${n ? "disabled title='Move or delete its products first'" : ""}>Remove</button></td></tr>`; }).join("")}
       </tbody></table>
       <div style="display:flex;gap:10px;margin-top:14px"><button class="btn btn-ghost" id="catAdd">+ Add category</button><span class="spacer"></span><button class="btn btn-primary" id="catSave">Save categories</button></div>
@@ -560,7 +560,7 @@
   function readCategories() {
     return $$("#catTable tbody tr").map((tr, i) => {
       const g = (k) => $(`[data-c="${k}"]`, tr).value.trim();
-      return { id: tr.dataset.id || slug(g("name")), name: g("name"), te: g("te"), blurb: g("blurb"), sort: Number(g("sort")) || i + 1 };
+      return { id: tr.dataset.id || slug(g("name")), name: g("name"), te: g("te"), blurb: g("blurb"), image: g("image"), sort: Number(g("sort")) || i + 1 };
     }).filter((c) => c.name);
   }
 
@@ -638,6 +638,13 @@
           ${f("heroTitleTe", "Headline (Telugu)", "", 'style="font-family:var(--te)"')}
           ${f("heroTitle", "Headline (English)")}
           ${t("heroText", "Intro line")}
+        </div>
+        <p class="section-label">Homepage photos <span class="muted" style="text-transform:none;letter-spacing:0;font-weight:400">(paste an image link — Unsplash links are resized automatically)</span></p>
+        <div class="grid2">
+          ${f("heroImage", "Top banner photo")}
+          ${f("storyImage", "Konaseema story photo")}
+          ${f("promiseImage", "Promise section photo (tall)")}
+          ${f("promiseImage2", "Promise section small photo")}
         </div>
       </div>
       <div class="panel">
@@ -721,7 +728,7 @@
       await d.collection("products").doc(draft.id).delete(); toast("Deleted"); closeModal(); return;
     }
 
-    if (t.id === "catAdd") { A.categories = readCategories(); A.categories.push({ id: "", name: "", te: "", blurb: "", sort: A.categories.length + 1 }); A.editing = false; render(); $$("#catTable tbody tr").pop().querySelector("input").focus(); A.editing = true; return; }
+    if (t.id === "catAdd") { A.categories = readCategories(); A.categories.push({ id: "", name: "", te: "", blurb: "", image: "", sort: A.categories.length + 1 }); A.editing = false; render(); $$("#catTable tbody tr").pop().querySelector("input").focus(); A.editing = true; return; }
     if (ds.cdel) { A.categories = readCategories(); A.categories.splice(Number(ds.cdel), 1); render(); A.editing = true; return; }
     if (t.id === "catSave") {
       const list = readCategories();
