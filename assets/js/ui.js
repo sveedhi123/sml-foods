@@ -32,8 +32,18 @@
   const DELAY = 6500;
   let at = 0, timer = null, paused = false;
 
+  // load a slide's photo only when it is about to be seen
+  function prep(k) {
+    const m = slides[(k + slides.length) % slides.length].querySelector(".slide-media");
+    if (m && m._put) { const f = m._put; m._put = null; f(); }
+  }
+  let prepTimer = null;
+
   function show(i) {
     at = (i + slides.length) % slides.length;
+    prep(at);
+    clearTimeout(prepTimer);
+    prepTimer = setTimeout(() => prep(at + 1), DELAY - 2500);
     slides.forEach((s, k) => { s.classList.toggle("is-on", k === at); s.setAttribute("aria-hidden", k === at ? "false" : "true"); });
     dots.forEach((d, k) => { d.setAttribute("aria-selected", k === at); d.classList.remove("run"); });
     if (!calm && !paused) { void dots[at].offsetWidth; dots[at].classList.add("run"); }
@@ -46,7 +56,7 @@
   $("#heroPrev").addEventListener("click", () => show(at - 1));
   $("#heroNext").addEventListener("click", () => show(at + 1));
   dots.forEach((d, k) => d.addEventListener("click", () => show(k)));
-  hero.addEventListener("mouseenter", () => { paused = true; clearTimeout(timer); dots[at].classList.remove("run"); });
+  hero.addEventListener("mouseenter", () => { prep(at + 1); paused = true; clearTimeout(timer); dots[at].classList.remove("run"); });
   hero.addEventListener("mouseleave", () => { paused = false; show(at); });
   document.addEventListener("visibilitychange", () => { if (document.hidden) clearTimeout(timer); else restart(); });
 

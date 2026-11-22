@@ -77,7 +77,7 @@
   function imgUrl(u, w, h) {
     if (!isCdn(u)) return u;
     const base = u.split("?")[0];
-    return `${base}?auto=format&fit=crop&q=72&w=${w}${h ? `&h=${h}` : ""}`;
+    return `${base}?auto=format&fit=crop&q=62&w=${w}${h ? `&h=${h}` : ""}`;
   }
   function img(u, alt, { cls = "", sizes = "100vw", widths = [400, 700, 1000, 1400], ratio = 0, eager = false } = {}) {
     if (!u) return "";
@@ -89,8 +89,10 @@
   const productVisual = (p, cls = "", opts = {}) => {
     const ims = (p.images || []).filter(Boolean);
     if (!ims.length) return `<div class="art ${cls}">${productArt(p)}</div>`;
-    const o = { sizes: CARD_SIZES, widths: [360, 560, 800], ratio: 1.25, ...opts };
-    return img(ims[0], p.nameEn, { ...o, cls }) + (opts.hover !== false && ims[1] ? img(ims[1], "", { ...o, cls: "alt" }) : "");
+    const o = { sizes: CARD_SIZES, widths: [240, 360, 480, 720], ratio: 1.25, ...opts };
+    // the second "hover" photo is only useful where people can hover (not on phones)
+    const canHover = window.matchMedia && matchMedia("(hover: hover)").matches;
+    return img(ims[0], p.nameEn, { ...o, cls }) + (opts.hover !== false && canHover && ims[1] ? img(ims[1], "", { ...o, cls: "alt" }) : "");
   };
 
   /* Products are sold per kg: a "1 kg" size with quantity = number of kilos */
@@ -184,8 +186,29 @@
     return { settings, categories, products, reviews: data.reviews || [], live: !!data.live };
   }
 
+  /* Firebase is ~130 KB. On the shop page it loads after the page has painted,
+     so it doesn't slow down the first photo. Other pages include it directly. */
+  const FB = "https://www.gstatic.com/firebasejs/10.12.2/";
+  let _fb = null;
+  function loadFirebase() {
+    if (window.firebase && firebase.firestore) return Promise.resolve();
+    if (_fb) return _fb;
+    const add = (f) => new Promise((ok, bad) => {
+      const s = document.createElement("script");
+      s.src = FB + f; s.onload = ok; s.onerror = bad; document.head.appendChild(s);
+    });
+    const afterLoad = document.readyState === "complete" ? Promise.resolve()
+      : new Promise((ok) => { addEventListener("load", ok, { once: true }); setTimeout(ok, 3500); });
+    _fb = afterLoad
+      .then(() => add("firebase-app-compat.js"))
+      .then(() => Promise.all([add("firebase-firestore-compat.js"), add("firebase-analytics-compat.js").catch(() => null)]))
+      .catch((e) => { console.warn("Firebase could not load", e); });
+    return _fb;
+  }
+
   /* Loads catalogue from Firestore; falls back to cache, then defaults. */
   async function loadStore() {
+    await loadFirebase();
     const d = db();
     if (!d) return normalise(readCache() || {});
     try {
@@ -212,7 +235,7 @@
 
   window.SML = {
     esc, inr, perKg, qtyText, unitPrice, STATUS, FLOW, productArt, productVisual, img, imgUrl, prefixes, pinMatches, lowestPrice, variantAvailable,
-    deliveryFor, upiLink, waLink, digits, genOrderNo, db, track, loadStore, readCache, withTimeout, shade,
+    deliveryFor, upiLink, waLink, digits, genOrderNo, db, track, loadFirebase, loadStore, readCache, withTimeout, shade,
     DEFAULT_SETTINGS, DEFAULT_CATEGORIES, DEFAULT_PRODUCTS
   };
 })();

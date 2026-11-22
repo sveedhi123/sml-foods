@@ -114,9 +114,8 @@
         const portrait = cdn ? `<source media="(max-width: 640px)" srcset="${[480, 720, 960].map((w) => `${esc(iu(url, w, Math.round(w * 1.6)))} ${w}w`).join(", ")}" sizes="100vw">` : "";
         m.innerHTML = `<picture>${portrait}${img(url, "", { sizes: "100vw", widths: [960, 1280, 1920], eager: i === 0 })}</picture>`;
       };
-      // the first slide shows at once; the others wait until the page has finished loading
-      if (i === 0 || document.readyState === "complete") setTimeout(put, i === 0 ? 0 : 400 * i);
-      else addEventListener("load", () => setTimeout(put, 600 * i), { once: true });
+      // the first slide shows at once; the slider (ui.js) loads each other photo shortly before it is shown
+      if (i === 0) put(); else m._put = put;
     });
     setImg("#storyImg", s.storyImage || D.storyImage, "Paddy fields and coconut palms in Konaseema", { sizes: "100vw", widths: [800, 1280, 1920, 2400] });
     const pm = $("#promiseMedia");
