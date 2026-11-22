@@ -107,7 +107,13 @@
       const url = id === "pickles" ? (s.heroImage || D.heroImage || c.image) : (c.image || (defs.find((x) => x.id === id) || {}).image);
       const m = $(".slide-media", sl);
       if (!m || !url || m.dataset.u === url) return;
-      const put = () => { m.dataset.u = url; m.innerHTML = img(url, "", { sizes: "100vw", widths: [640, 960, 1280, 1920], eager: i === 0 }); };
+      const put = () => {
+        m.dataset.u = url;
+        const iu = window.SML.imgUrl;
+        const cdn = /images\.unsplash\.com/.test(url);
+        const portrait = cdn ? `<source media="(max-width: 640px)" srcset="${[480, 720, 960].map((w) => `${esc(iu(url, w, Math.round(w * 1.6)))} ${w}w`).join(", ")}" sizes="100vw">` : "";
+        m.innerHTML = `<picture>${portrait}${img(url, "", { sizes: "100vw", widths: [960, 1280, 1920], eager: i === 0 })}</picture>`;
+      };
       // the first slide shows at once; the others wait until the page has finished loading
       if (i === 0 || document.readyState === "complete") setTimeout(put, i === 0 ? 0 : 400 * i);
       else addEventListener("load", () => setTimeout(put, 600 * i), { once: true });
