@@ -4,6 +4,10 @@
   const $$ = (s, el = document) => Array.from(el.querySelectorAll(s));
   const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  /* Web fonts load without holding up the first paint */
+  const gf = document.getElementById("gfonts");
+  if (gf) gf.media = "all";
+
   /* ---------- Header: solid + compact after scrolling ---------- */
   const header = $("#header");
   const onScroll = () => {

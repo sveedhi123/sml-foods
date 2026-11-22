@@ -106,7 +106,11 @@
       const c = S.categories.find((x) => x.id === id) || defs.find((x) => x.id === id) || {};
       const url = id === "pickles" ? (s.heroImage || D.heroImage || c.image) : (c.image || (defs.find((x) => x.id === id) || {}).image);
       const m = $(".slide-media", sl);
-      if (m && url && m.dataset.u !== url) { m.dataset.u = url; m.innerHTML = img(url, "", { sizes: "100vw", widths: [800, 1280, 1920, 2400], eager: i === 0 }); }
+      if (!m || !url || m.dataset.u === url) return;
+      const put = () => { m.dataset.u = url; m.innerHTML = img(url, "", { sizes: "100vw", widths: [640, 960, 1280, 1920], eager: i === 0 }); };
+      // the first slide shows at once; the others wait until the page has finished loading
+      if (i === 0 || document.readyState === "complete") setTimeout(put, i === 0 ? 0 : 400 * i);
+      else addEventListener("load", () => setTimeout(put, 600 * i), { once: true });
     });
     setImg("#storyImg", s.storyImage || D.storyImage, "Paddy fields and coconut palms in Konaseema", { sizes: "100vw", widths: [800, 1280, 1920, 2400] });
     const pm = $("#promiseMedia");

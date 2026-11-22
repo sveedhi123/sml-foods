@@ -72,8 +72,8 @@ em { font-style: italic; color: var(--gold-text); }
 .btn-primary { background: var(--black); color: #fff; }
 .btn-primary:hover { background: var(--gold); color: var(--black); box-shadow: 0 10px 24px rgba(195, 143, 50, .35); }
 .btn-gold { background: linear-gradient(135deg, var(--gold-3), var(--gold-2) 45%, var(--gold)); color: var(--black); box-shadow: 0 8px 22px rgba(195, 143, 50, .3); }
-.btn-gold::after { content: ""; position: absolute; top: 0; left: -60%; width: 40%; height: 100%; background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .55), transparent); transform: skewX(-20deg); animation: shine 4.5s ease-in-out infinite; }
-@keyframes shine { 0%, 65% { left: -60%; } 100% { left: 130%; } }
+.btn-gold::after { content: ""; position: absolute; top: 0; left: 0; width: 40%; height: 100%; background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .55), transparent); transform: translateX(-160%) skewX(-20deg); animation: shine 4.5s ease-in-out infinite; will-change: transform; }
+@keyframes shine { 0%, 65% { transform: translateX(-160%) skewX(-20deg); } 100% { transform: translateX(330%) skewX(-20deg); } }
 .btn-gold:hover { box-shadow: 0 14px 30px rgba(195, 143, 50, .45); }
 .btn-ghost { background: var(--surface); border-color: var(--line); color: var(--ink); }
 .btn-ghost:hover { border-color: var(--black); }
@@ -141,10 +141,10 @@ em { font-style: italic; color: var(--gold-text); }
 .hero-arrow.next { right: 24px; }
 .hero-dots { position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 3; display: flex; gap: 10px; }
 .hero-dots button { width: 46px; height: 4px; padding: 0; border: 0; border-radius: 2px; background: rgba(255, 255, 255, .3); overflow: hidden; }
-.hero-dots button i { display: block; height: 100%; width: 0; background: var(--gold-2); }
-.hero-dots button[aria-selected="true"] i { width: 100%; }
-.hero-dots button.run i { width: 0; animation: fill 6.5s linear forwards; }
-@keyframes fill { to { width: 100%; } }
+.hero-dots button i { display: block; height: 100%; width: 100%; background: var(--gold-2); transform: scaleX(0); transform-origin: left; }
+.hero-dots button[aria-selected="true"] i { transform: scaleX(1); }
+.hero-dots button.run i { transform: scaleX(0); animation: fill 6.5s linear forwards; }
+@keyframes fill { to { transform: scaleX(1); } }
 .hero-text { display: none; }
 
 /* ---------- Trust strip ---------- */
@@ -446,6 +446,12 @@ em { font-style: italic; color: var(--gold-text); }
 
 
 /* ---------- Responsive ---------- */
+@media (max-width: 1400px) {
+  /* arrows move to the bottom-right so they never sit on the headline */
+  .hero-arrow { top: auto; bottom: 18px; margin-top: 0; width: 46px; height: 46px; }
+  .hero-arrow.prev { left: auto; right: 82px; }
+  .hero-arrow.next { right: 24px; }
+}
 @media (max-width: 1080px) {
   .nav { gap: 22px; }
   .trust-in { grid-template-columns: 1fr 1fr; }
