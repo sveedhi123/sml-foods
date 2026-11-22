@@ -146,11 +146,22 @@
     try {
       if (!firebase.apps.length) firebase.initializeApp(window.SML_CONFIG.firebase);
       _db = firebase.firestore();
+      startAnalytics();
       return _db;
     } catch (e) {
       console.warn("Firebase init failed", e);
       return null;
     }
+  }
+
+  /* Visitor analytics (Google Analytics via Firebase). Only on the shop pages, never in Admin. */
+  let _ga = null;
+  function startAnalytics() {
+    if (_ga || !firebase.analytics || /admin\.html$/.test(location.pathname)) return;
+    try { _ga = firebase.analytics(); } catch (e) { _ga = null; }
+  }
+  function track(name, params) {
+    try { db(); if (_ga) _ga.logEvent(name, params || {}); } catch (e) { /* analytics must never break the shop */ }
   }
 
   const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), ms))]);
@@ -201,7 +212,7 @@
 
   window.SML = {
     esc, inr, perKg, qtyText, unitPrice, STATUS, FLOW, productArt, productVisual, img, imgUrl, prefixes, pinMatches, lowestPrice, variantAvailable,
-    deliveryFor, upiLink, waLink, digits, genOrderNo, db, loadStore, readCache, withTimeout, shade,
+    deliveryFor, upiLink, waLink, digits, genOrderNo, db, track, loadStore, readCache, withTimeout, shade,
     DEFAULT_SETTINGS, DEFAULT_CATEGORIES, DEFAULT_PRODUCTS
   };
 })();

@@ -1,0 +1,9 @@
+# SML Foods
+# Note: search engines read robots.txt only from the root of a domain.
+# This file starts working when the site moves to its own domain (e.g. smlfoods.in).
+User-agent: *
+Disallow: /admin.html
+Disallow: /order.html
+Allow: /
+
+Sitemap: https://sveedhi123.github.io/sml-foods/sitemap.xml

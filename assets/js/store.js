@@ -292,6 +292,8 @@
   /* ---------------- Cart ---------------- */
   function saveCart() { writeJSON(CART_KEY, cart); renderCartCount(); }
   function addToCart(pid, vid, qty = 1) {
+    const tp = product(pid);
+    if (tp) window.SML.track("add_to_cart", { currency: "INR", items: [{ item_id: pid, item_name: tp.nameEn, quantity: qty }] });
     const p = product(pid);
     const v = p && (p.variants || []).find((x) => x.id === vid);
     if (!p || !v || !variantAvailable(v) || p.status !== "active") return;
@@ -526,6 +528,7 @@
       batch.set(d.collection("payments").doc(utr), { orderId: ref.id, createdAt: ts });
       await window.SML.withTimeout(batch.commit(), 15000);
       co.orderId = ref.id;
+      window.SML.track("purchase", { transaction_id: order.orderNo, currency: "INR", value: order.total, items: order.items.map((i) => ({ item_id: i.productId, item_name: i.name, price: i.price, quantity: i.qty })) });
       cart = []; saveCart();
       stepDone(order);
     } catch (e) {
