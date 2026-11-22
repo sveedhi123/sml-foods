@@ -53,6 +53,7 @@
     renderCartCount();
     if (!$("#cartDrawer").hidden) renderCart();
     observeReveal();
+    window.SML.lazyImages();
   }
 
   let io;
@@ -112,7 +113,7 @@
         const iu = window.SML.imgUrl;
         const cdn = /images\.unsplash\.com/.test(url);
         const portrait = cdn ? `<source media="(max-width: 640px)" srcset="${[480, 640, 750].map((w) => `${esc(iu(url, w, Math.round(w * 1.6)).replace("auto=format", "fm=webp"))} ${w}w`).join(", ")}" sizes="100vw">` : "";
-        m.innerHTML = `<picture>${portrait}${img(url, "", { sizes: "100vw", widths: [960, 1280, 1920], eager: i === 0 })}</picture>`;
+        m.innerHTML = `<picture>${portrait}${img(url, "", { sizes: "100vw", widths: [960, 1280, 1920], eager: true })}</picture>`;
       };
       // the first slide shows at once; the slider (ui.js) loads each other photo shortly before it is shown
       if (i === 0) put(); else m._put = put;

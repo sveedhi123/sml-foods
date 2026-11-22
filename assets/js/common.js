@@ -83,7 +83,33 @@
     if (!u) return "";
     const h = (w) => (ratio ? Math.round(w * ratio) : 0);
     const srcset = isCdn(u) ? ` srcset="${widths.map((w) => `${esc(imgUrl(u, w, h(w)))} ${w}w`).join(", ")}" sizes="${sizes}"` : "";
-    return `<img class="${cls}" src="${esc(imgUrl(u, widths[1] || widths[0], h(widths[1] || widths[0])))}"${srcset} alt="${esc(alt)}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
+    const src = esc(imgUrl(u, widths[1] || widths[0], h(widths[1] || widths[0])));
+    if (eager) return `<img class="${cls}" src="${src}"${srcset} alt="${esc(alt)}" fetchpriority="high" decoding="async">`;
+    // lazy: the real address is filled in only when the photo scrolls near the screen (see lazyImages)
+    return `<img class="${cls} lz" data-src="${src}"${srcset.replace(" srcset=", " data-srcset=")} alt="${esc(alt)}" loading="lazy" decoding="async">`;
+  }
+
+  /* Loads photos marked "lz" when they come within ~300px of the screen.
+     The browser's own lazy-loading starts far too early on phones and slows the first photo. */
+  let _lzObs = null;
+  function lazyImages(root = document) {
+    const imgs = root.querySelectorAll("img.lz[data-src]");
+    const fill = (im) => {
+      if (im.dataset.srcset) im.srcset = im.dataset.srcset;
+      im.src = im.dataset.src;
+      im.removeAttribute("data-src"); im.removeAttribute("data-srcset"); im.classList.remove("lz");
+    };
+    if (!("IntersectionObserver" in window)) { imgs.forEach(fill); return; }
+    if (!_lzObs) {
+      _lzObs = new IntersectionObserver((entries) => entries.forEach((e) => {
+        if (e.isIntersecting) { _lzObs.unobserve(e.target); fill(e.target); }
+      }), { rootMargin: "300px 0px" });
+      // watch for photos added later (search results, cart, product popup, slider)
+      let t = null;
+      new MutationObserver(() => { clearTimeout(t); t = setTimeout(() => lazyImages(), 30); })
+        .observe(document.body, { childList: true, subtree: true });
+    }
+    imgs.forEach((im) => _lzObs.observe(im));
   }
   const CARD_SIZES = "(max-width: 640px) 50vw, (max-width: 1100px) 33vw, 300px";
   const productVisual = (p, cls = "", opts = {}) => {
@@ -233,8 +259,12 @@
     }
   }
 
+  // start lazy photo loading on every page that uses these helpers
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", () => lazyImages());
+  else setTimeout(() => lazyImages(), 0);
+
   window.SML = {
-    esc, inr, perKg, qtyText, unitPrice, STATUS, FLOW, productArt, productVisual, img, imgUrl, prefixes, pinMatches, lowestPrice, variantAvailable,
+    esc, inr, perKg, qtyText, unitPrice, STATUS, FLOW, productArt, productVisual, img, imgUrl, lazyImages, prefixes, pinMatches, lowestPrice, variantAvailable,
     deliveryFor, upiLink, waLink, digits, genOrderNo, db, track, loadFirebase, loadStore, readCache, withTimeout, shade,
     DEFAULT_SETTINGS, DEFAULT_CATEGORIES, DEFAULT_PRODUCTS
   };

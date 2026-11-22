@@ -547,3 +547,4 @@ em { font-style: italic; color: var(--gold-text); }
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   .reveal, .slide-copy > * { opacity: 1 !important; transform: none !important; }
 }
+img.lz { opacity: 0; }
