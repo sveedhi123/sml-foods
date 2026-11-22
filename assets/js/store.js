@@ -111,7 +111,7 @@
         m.dataset.u = url;
         const iu = window.SML.imgUrl;
         const cdn = /images\.unsplash\.com/.test(url);
-        const portrait = cdn ? `<source media="(max-width: 640px)" srcset="${[480, 720, 960].map((w) => `${esc(iu(url, w, Math.round(w * 1.6)))} ${w}w`).join(", ")}" sizes="100vw">` : "";
+        const portrait = cdn ? `<source media="(max-width: 640px)" srcset="${[480, 640, 750].map((w) => `${esc(iu(url, w, Math.round(w * 1.6)).replace("auto=format", "fm=webp"))} ${w}w`).join(", ")}" sizes="100vw">` : "";
         m.innerHTML = `<picture>${portrait}${img(url, "", { sizes: "100vw", widths: [960, 1280, 1920], eager: i === 0 })}</picture>`;
       };
       // the first slide shows at once; the slider (ui.js) loads each other photo shortly before it is shown
